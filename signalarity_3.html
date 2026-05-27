@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Signalarity — AI Sales Intelligence OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET & BASE ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #060a12;
+  --bg2:      #0c1220;
+  --bg3:      #111827;
+  --border:   #1a2540;
+  --blue:     #1f6feb;
+  --blue-mid: #3b82f6;
+  --blue-lt:  #58a6ff;
+  --blue-xl:  #93c5fd;
+  --green:    #3fb950;
+  --amber:    #d29922;
+  --text:     #e2e8f0;
+  --text-2:   #94a3b8;
+  --text-3:   #4b6080;
+  --glow:     rgba(31,111,235,0.18);
+  --ff-head: 'Jost', sans-serif;
+  --ff-body:  'DM Sans', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--ff-body); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; }
+
+/* ── NOISE TEXTURE OVERLAY ─────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.025;
+}
+
+/* ── NAV ───────────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5%;
+  height: 72px;
+  background: rgba(6,10,18,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo-mark { width: 36px; height: 36px; }
+.nav-wordmark {
+  font-family: var(--ff-head); font-size: 20px; font-weight: 700; letter-spacing: -0.5px;
+}
+.nav-wordmark span { color: var(--blue-lt); font-weight: 400; }
+.nav-links { display: flex; gap: 36px; font-size: 14px; color: var(--text-2); font-weight: 400; }
+.nav-links a:hover { color: var(--text); transition: color 0.2s; }
+.nav-cta {
+  background: var(--blue); color: #fff; padding: 9px 22px;
+  border-radius: 6px; font-size: 14px; font-weight: 500;
+  transition: background 0.2s, transform 0.15s;
+  font-family: var(--ff-body);
+}
+.nav-cta:hover { background: var(--blue-mid); transform: translateY(-1px); }
+
+/* ── HERO ──────────────────────────────────────────────────────── */
+.hero {
+  position: relative; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 120px 5% 80px;
+  overflow: hidden;
+}
+/* Radial glow behind hero */
+.hero::after {
+  content: '';
+  position: absolute; top: 10%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 600px;
+  background: radial-gradient(ellipse at center, rgba(31,111,235,0.22) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+/* Grid lines */
+.hero-grid {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(31,111,235,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31,111,235,0.06) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+}
+.hero-content { position: relative; z-index: 1; max-width: 860px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(31,111,235,0.12); border: 1px solid rgba(31,111,235,0.3);
+  color: var(--blue-lt); font-size: 12px; font-weight: 500; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 6px 16px; border-radius: 20px; margin-bottom: 32px;
+  animation: fadeUp 0.8s ease both;
+}
+.hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+.hero-title {
+  font-family: var(--ff-head); font-size: clamp(48px, 7vw, 88px);
+  font-weight: 800; line-height: 1.05; letter-spacing: -2px;
+  margin-bottom: 28px;
+  animation: fadeUp 0.8s 0.1s ease both;
+}
+.hero-title .blue { color: var(--blue-lt); }
+.hero-title .dim  { color: var(--text-3); }
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px); color: var(--text-2); font-weight: 300;
+  max-width: 580px; margin: 0 auto 48px; line-height: 1.7;
+  animation: fadeUp 0.8s 0.2s ease both;
+}
+.hero-btns {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  animation: fadeUp 0.8s 0.3s ease both;
+}
+.btn-primary {
+  background: var(--blue); color: #fff; padding: 14px 32px;
+  border-radius: 8px; font-size: 15px; font-weight: 500;
+  border: none; cursor: pointer; transition: all 0.2s;
+  font-family: var(--ff-body);
+}
+.btn-primary:hover { background: var(--blue-mid); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(31,111,235,0.4); }
+.btn-ghost {
+  background: transparent; color: var(--text-2); padding: 14px 32px;
+  border-radius: 8px; font-size: 15px; font-weight: 500;
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+  font-family: var(--ff-body);
+}
+.btn-ghost:hover { border-color: var(--blue-lt); color: var(--text); }
+@keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+
+/* Hero logo mark large */
+.hero-mark {
+  margin: 0 auto 40px;
+  animation: fadeUp 0.8s 0s ease both;
+}
+
+/* ── LOGO MARK INLINE SVG (reusable) ──────────────────────────── */
+.signal-mark { overflow: visible; }
+
+/* ── METRICS STRIP ─────────────────────────────────────────────── */
+.metrics-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: relative; z-index: 2;
+}
+.metric-item {
+  padding: 40px 32px; border-right: 1px solid var(--border);
+  text-align: center;
+}
+.metric-item:last-child { border-right: none; }
+.metric-num {
+  font-family: var(--ff-head); font-size: 48px; font-weight: 800;
+  color: var(--blue-lt); line-height: 1; margin-bottom: 8px;
+  letter-spacing: -1px;
+}
+.metric-label { font-size: 13px; color: var(--text-2); letter-spacing: 0.5px; }
+
+/* ── SECTION BASE ──────────────────────────────────────────────── */
+section { position: relative; }
+.section-inner { max-width: 1200px; margin: 0 auto; padding: 100px 5%; }
+.section-tag {
+  font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--blue-lt); margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--ff-head); font-size: clamp(32px, 4vw, 52px);
+  font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px;
+}
+.section-sub {
+  font-size: 17px; color: var(--text-2); font-weight: 300;
+  max-width: 560px; line-height: 1.7; margin-bottom: 64px;
+}
+
+/* ── HOW IT WORKS ──────────────────────────────────────────────── */
+.how-bg { background: var(--bg); }
+.steps-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+  border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+}
+.step {
+  padding: 40px 28px; border-right: 1px solid var(--border);
+  position: relative; background: var(--bg2);
+  transition: background 0.2s;
+}
+.step:hover { background: var(--bg3); }
+.step:last-child { border-right: none; }
+.step-num {
+  font-family: var(--ff-head); font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; color: var(--blue); margin-bottom: 24px;
+  display: flex; align-items: center; gap: 8px;
+}
+.step-num::before {
+  content: ''; width: 24px; height: 1px; background: var(--blue);
+}
+.step-icon { font-size: 28px; margin-bottom: 20px; }
+.step-title { font-family: var(--ff-head); font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.step-desc { font-size: 13px; color: var(--text-2); line-height: 1.65; }
+/* Arrow connectors */
+.step::after {
+  content: '›';
+  position: absolute; right: -12px; top: 50%; transform: translateY(-50%);
+  color: var(--blue); font-size: 20px; z-index: 2;
+}
+.step:last-child::after { display: none; }
+
+/* ── FEATURES ──────────────────────────────────────────────────── */
+.features-bg { background: var(--bg2); }
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+}
+.feature-card {
+  background: var(--bg2); padding: 40px 36px;
+  transition: background 0.2s;
+  position: relative; overflow: hidden;
+}
+.feature-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--blue), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.feature-card:hover { background: var(--bg3); }
+.feature-card:hover::before { opacity: 1; }
+.feature-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(31,111,235,0.12); border: 1px solid rgba(31,111,235,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; margin-bottom: 24px;
+}
+.feature-title { font-family: var(--ff-head); font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+.feature-desc { font-size: 14px; color: var(--text-2); line-height: 1.7; }
+
+/* ── PROSPECT CARD DEMO ────────────────────────────────────────── */
+.demo-bg { background: var(--bg); }
+.demo-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.demo-text .section-sub { margin-bottom: 32px; }
+.demo-bullets { display: flex; flex-direction: column; gap: 16px; }
+.demo-bullet { display: flex; align-items: flex-start; gap: 14px; font-size: 14px; color: var(--text-2); line-height: 1.6; }
+.demo-bullet-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-lt); flex-shrink: 0; margin-top: 7px; }
+.demo-bullet strong { color: var(--text); }
+/* Prospect card UI replica */
+.prospect-card {
+  background: #0f1824; border: 1px solid #1e2d45; border-radius: 14px;
+  padding: 28px; border-left: 3px solid var(--green);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  font-size: 13px;
+}
+.pc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.pc-name { font-family: var(--ff-head); font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.pc-role { font-size: 12px; color: var(--text-2); }
+.pc-badge { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 4px 10px; border-radius: 20px; background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); white-space: nowrap; }
+.pc-contact { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+.pc-contact-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--blue-lt); }
+.pc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.pc-tag { font-size: 10px; padding: 3px 10px; border-radius: 20px; background: rgba(31,111,235,0.12); color: var(--blue-lt); border: 1px solid rgba(31,111,235,0.2); }
+.pc-section { margin-bottom: 14px; }
+.pc-section-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); margin-bottom: 5px; }
+.pc-section-text { font-size: 12px; color: #c9d1d9; line-height: 1.6; }
+.pc-sources { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 14px; }
+.pc-source { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.04); color: var(--text-3); border: 1px solid var(--border); }
+
+/* ── WHO IT'S FOR ──────────────────────────────────────────────── */
+.personas-bg { background: var(--bg2); }
+.personas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.persona-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+  padding: 36px 32px; position: relative; overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.persona-card:hover { border-color: var(--blue); transform: translateY(-4px); }
+.persona-num {
+  font-family: var(--ff-head); font-size: 64px; font-weight: 800;
+  color: rgba(31,111,235,0.08); position: absolute; top: 16px; right: 20px;
+  line-height: 1; letter-spacing: -2px;
+}
+.persona-role { font-family: var(--ff-head); font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--blue-lt); }
+.persona-desc { font-size: 14px; color: var(--text-2); line-height: 1.7; margin-bottom: 20px; }
+.persona-perks { display: flex; flex-direction: column; gap: 10px; }
+.persona-perk { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text-2); }
+.perk-check { color: var(--green); flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+
+/* ── SIGNAL TYPES ──────────────────────────────────────────────── */
+.signals-bg { background: var(--bg); }
+.signals-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+}
+.signal-pill {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px 20px;
+  display: flex; align-items: center; gap: 14px;
+  transition: all 0.2s;
+}
+.signal-pill:hover { border-color: var(--blue); background: var(--bg3); }
+.signal-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--blue-lt); flex-shrink: 0; }
+.signal-pill-text { font-size: 13px; font-weight: 500; color: var(--text); }
+
+/* ── INTENT TIERS ──────────────────────────────────────────────── */
+.tiers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+.tier-card {
+  border-radius: 14px; padding: 36px 32px;
+  border: 1px solid; position: relative; overflow: hidden;
+}
+.tier-high  { background: rgba(63,185,80,0.06); border-color: rgba(63,185,80,0.25); }
+.tier-med   { background: rgba(210,153,34,0.06); border-color: rgba(210,153,34,0.25); }
+.tier-low   { background: rgba(88,166,255,0.06); border-color: rgba(88,166,255,0.2); }
+.tier-badge { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 20px; }
+.tier-high  .tier-badge { background: rgba(63,185,80,0.15); color: var(--green); }
+.tier-med   .tier-badge { background: rgba(210,153,34,0.15); color: var(--amber); }
+.tier-low   .tier-badge { background: rgba(88,166,255,0.1); color: var(--blue-lt); }
+.tier-title { font-family: var(--ff-head); font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+.tier-desc  { font-size: 14px; color: var(--text-2); line-height: 1.7; margin-bottom: 20px; }
+.tier-examples { display: flex; flex-direction: column; gap: 8px; }
+.tier-ex { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 8px; }
+.tier-ex::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+/* ── OUTPUT FIELDS ─────────────────────────────────────────────── */
+.fields-bg { background: var(--bg2); }
+.fields-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+}
+.field-chip {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 18px; display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--text);
+  transition: border-color 0.2s;
+}
+.field-chip:hover { border-color: var(--blue-lt); }
+.field-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.fd-green  { background: var(--green); }
+.fd-blue   { background: var(--blue-lt); }
+.fd-amber  { background: var(--amber); }
+.fd-gray   { background: var(--text-3); }
+
+/* ── TESTIMONIAL STRIP ─────────────────────────────────────────── */
+.quote-bg { background: var(--bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.quote-inner { max-width: 900px; margin: 0 auto; padding: 100px 5%; text-align: center; }
+.quote-mark { font-family: var(--ff-head); font-size: 120px; line-height: 0.6; color: var(--blue); opacity: 0.2; margin-bottom: 24px; }
+.quote-text { font-family: var(--ff-head); font-size: clamp(22px, 3vw, 36px); font-weight: 600; line-height: 1.35; color: var(--text); letter-spacing: -0.5px; margin-bottom: 32px; }
+.quote-author { font-size: 14px; color: var(--text-2); }
+
+/* ── CTA SECTION ───────────────────────────────────────────────── */
+.cta-bg {
+  background: linear-gradient(135deg, var(--bg2) 0%, #0a1628 100%);
+  border-top: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.cta-bg::before {
+  content: '';
+  position: absolute; top: -50%; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(31,111,235,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-inner { max-width: 760px; margin: 0 auto; padding: 120px 5%; text-align: center; position: relative; z-index: 1; }
+.cta-title { font-family: var(--ff-head); font-size: clamp(36px, 5vw, 60px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 20px; }
+.cta-sub { font-size: 17px; color: var(--text-2); font-weight: 300; margin-bottom: 48px; line-height: 1.7; }
+.cta-disclaimer { font-size: 12px; color: var(--text-3); margin-top: 24px; line-height: 1.6; }
+
+/* ── FOOTER ────────────────────────────────────────────────────── */
+footer {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  padding: 48px 5%;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px;
+}
+.footer-logo { display: flex; align-items: center; gap: 10px; }
+.footer-logo-name { font-family: var(--ff-head); font-size: 17px; font-weight: 700; }
+.footer-logo-name span { color: var(--blue-lt); font-weight: 400; }
+.footer-tagline { font-size: 12px; color: var(--text-3); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+.footer-links { display: flex; gap: 28px; font-size: 13px; color: var(--text-3); }
+.footer-links a:hover { color: var(--text-2); }
+.footer-copy { font-size: 12px; color: var(--text-3); }
+
+/* ── SCROLL REVEAL ─────────────────────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .metrics-strip { grid-template-columns: repeat(2, 1fr); }
+  .steps-grid { grid-template-columns: 1fr; }
+  .step { border-right: none; border-bottom: 1px solid var(--border); }
+  .step::after { display: none; }
+  .features-grid, .personas-grid, .tiers-grid { grid-template-columns: 1fr; }
+  .demo-layout { grid-template-columns: 1fr; }
+  .signals-grid { grid-template-columns: repeat(2, 1fr); }
+  .fields-grid { grid-template-columns: repeat(3, 1fr); }
+  .nav-links { display: none; }
+  footer { flex-direction: column; text-align: center; }
+}
+
+/* ── PASSWORD GATE ── */
+.gate {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 24px; text-align: center;
+}
+.gate-logo { font-family: var(--ff-head); font-size: 32px; font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 6px; }
+.gate-logo span { color: var(--blue-lt); font-weight: 400; }
+.gate-tagline { font-size: 13px; color: var(--text-2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 40px; }
+.gate-box { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; }
+.gate-label { font-size: 14px; color: var(--text-2); margin-bottom: 4px; }
+.gate-input {
+  width: 100%; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: var(--ff-body); font-size: 16px;
+  padding: 14px 16px; outline: none; text-align: center; letter-spacing: 4px;
+  transition: border-color 0.2s;
+}
+.gate-input:focus { border-color: var(--blue-lt); }
+.gate-input::placeholder { letter-spacing: 0; color: var(--text-3); font-size: 14px; }
+.gate-btn {
+  width: 100%; background: var(--blue); color: #fff; border: none;
+  border-radius: 8px; font-family: var(--ff-body); font-size: 15px; font-weight: 500;
+  padding: 14px; cursor: pointer; transition: background 0.15s;
+}
+.gate-btn:hover { background: #388bfd; }
+.gate-error { font-size: 13px; color: #f85149; opacity: 0; transition: opacity 0.2s; }
+.gate-error.show { opacity: 1; }
+.gate-hint { font-size: 12px; color: var(--text-3); margin-top: 20px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<!-- ── PASSWORD GATE ── -->
+<div class="gate" id="gate">
+  <div class="gate-logo">signal<span>arity</span></div>
+  <div class="gate-tagline">AI Sales Intelligence OS</div>
+  <div class="gate-box">
+    <div class="gate-label">Enter your access code to continue</div>
+    <input class="gate-input" type="password" id="gate-input"
+      placeholder="Access code"
+      autocomplete="off" autocapitalize="off" spellcheck="false"/>
+    <button class="gate-btn" onclick="checkGate()">Enter →</button>
+    <div class="gate-error" id="gate-error">Incorrect access code. Please try again.</div>
+  </div>
+  <p class="gate-hint">Contact your Signalarity representative to request access.</p>
+</div>
+
+<!-- ── MAIN SITE (hidden until authenticated) ── -->
+<div id="site-content" style="display:none">
+
+<!-- ── NAV ──────────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">
+    <img src="data:image/png;base64,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" class="nav-logo-mark" width="36" height="36" alt="Signalarity signal mark"/>
+    <div class="nav-wordmark">signal<span>arity</span></div>
+  </div>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#demo">See it live</a>
+    <a href="#personas">Who it's for</a>
+  </div>
+  <a href="#cta" class="nav-cta">Get APEX →</a>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────────── -->
+<section class="hero" id="hero" style="min-height:auto;padding:80px 0 0">
+  <div style="width:100%;max-width:1200px;margin:0 auto;padding:0 5%">
+    <img
+      src="hero-banner.png"
+      alt="Signalarity — Find the right buyers. Understand their pain. Reach them first."
+      style="width:100%;border-radius:16px;display:block;box-shadow:0 24px 80px rgba(0,0,0,0.6);"
+    />
+  </div>
+  <div class="hero-content" style="position:relative;z-index:1;max-width:860px;margin:0 auto;padding:60px 5% 80px">
+    <div class="hero-badge">● &nbsp;AI Sales Intelligence · Now Live</div>
+    <h1 class="hero-title">
+      Find the <span class="blue">right buyers.</span><br/>
+      Reach them <span class="dim">first.</span>
+    </h1>
+    <p class="hero-sub">APEX by Signalarity uses Claude AI to generate deeply enriched B2B prospect profiles — with intent scores, buying triggers, and AI challenges — in under 10 seconds.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Request APEX Access →</button>
+      <button class="btn-ghost" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">See a sample profile</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── METRICS STRIP ─────────────────────────────────────────────── -->
+<div class="metrics-strip reveal">
+  <div class="metric-item">
+    <div class="metric-num">&lt;10s</div>
+    <div class="metric-label">Research time per prospect</div>
+  </div>
+  <div class="metric-item">
+    <div class="metric-num">15</div>
+    <div class="metric-label">Enriched data points per profile</div>
+  </div>
+  <div class="metric-item">
+    <div class="metric-num">8</div>
+    <div class="metric-label">Configurable intent signals</div>
+  </div>
+  <div class="metric-item">
+    <div class="metric-num">6</div>
+    <div class="metric-label">Prospects per agent run</div>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ─────────────────────────────────────────────── -->
+<section class="how-bg" id="how">
+  <div class="section-inner">
+    <div class="section-tag reveal">How it works</div>
+    <h2 class="section-title reveal">From config to pipeline<br/>in under 60 seconds</h2>
+    <p class="section-sub reveal">No training, no setup, no IT ticket. Open the file, enter your API key, and launch.</p>
+    <div class="steps-grid reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon">🎯</div>
+        <div class="step-title">Configure your ICP</div>
+        <div class="step-desc">Set your target industry, company size, geography, and job titles in seconds.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon">⚡</div>
+        <div class="step-title">Select intent signals</div>
+        <div class="step-desc">Toggle 8 buying signals — AI Initiative, M&A, Cloud Migration, RFP, and more.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon">🤖</div>
+        <div class="step-title">Launch the agent</div>
+        <div class="step-desc">Claude AI generates 6 deeply researched profiles matching your exact criteria.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-icon">📊</div>
+        <div class="step-title">Review & prioritise</div>
+        <div class="step-desc">Intent-scored cards surface your hottest leads instantly. HIGH first, always.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-icon">📤</div>
+        <div class="step-title">Export & outreach</div>
+        <div class="step-desc">Export to CSV for your CRM. Walk into every call with a full intelligence brief.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ─────────────────────────────────────────────────── -->
+<section class="features-bg" id="features">
+  <div class="section-inner">
+    <div class="section-tag reveal">Capabilities</div>
+    <h2 class="section-title reveal">Everything your team<br/>needs to win the call</h2>
+    <p class="section-sub reveal">APEX isn't a contact list — it's a pre-call intelligence briefing, generated in seconds.</p>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Intent Scoring</div>
+        <div class="feature-desc">Every prospect is scored HIGH, MEDIUM, or LOW based on detected buying signals. Prioritise your hottest leads without manual triage.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">AI Challenge Intelligence</div>
+        <div class="feature-desc">Each profile includes a specific description of the prospect's AI or data challenge — giving reps instant context before the first conversation.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Buying Trigger Detection</div>
+        <div class="feature-desc">Identifies the event or deadline driving urgency — M&A activity, board mandates, cloud migration deadlines, active RFPs — so you reach out at the right moment.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎛️</div>
+        <div class="feature-title">Configurable ICP Targeting</div>
+        <div class="feature-desc">Target by industry, company size, geography, job title, and up to 8 custom buying signals. Every run is tailored to your exact ideal customer profile.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <div class="feature-title">Full Contact Detail</div>
+        <div class="feature-desc">Name, title, company, work email, phone, and LinkedIn — everything your team needs to start a conversation without switching tabs.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📤</div>
+        <div class="feature-title">One-Click CSV Export</div>
+        <div class="feature-desc">Export your enriched prospect list directly to CSV for immediate CRM import, sequence enrollment, or team distribution.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">Zero Infrastructure</div>
+        <div class="feature-desc">APEX runs entirely in a browser as a single HTML file. No installation, no server, no IT ticket. Share it — your team is up and running in minutes.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔑</div>
+        <div class="feature-title">Private by Design</div>
+        <div class="feature-desc">Each user brings their own Anthropic API key. Keys are never stored, never shared, never transmitted beyond Anthropic's secure API. Fully private by design.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📡</div>
+        <div class="feature-title">Live Agent Log</div>
+        <div class="feature-desc">A real-time terminal-style log streams agent activity as it runs — so your team sees exactly what signals are being detected and why prospects were selected.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROSPECT CARD DEMO ─────────────────────────────────────────── -->
+<section class="demo-bg" id="demo">
+  <div class="section-inner">
+    <div class="demo-layout">
+      <div class="demo-text">
+        <div class="section-tag reveal">Sample output</div>
+        <h2 class="section-title reveal">Not a contact list.<br/>An intelligence brief.</h2>
+        <p class="section-sub reveal">Every prospect card gives your rep a complete picture before they say hello — challenge, trigger, signals, sources, and contact details all in one view.</p>
+        <div class="demo-bullets reveal">
+          <div class="demo-bullet"><div class="demo-bullet-dot"></div><div><strong>AI Challenge</strong> — the specific data or AI pain the prospect is experiencing right now, tied to your keywords.</div></div>
+          <div class="demo-bullet"><div class="demo-bullet-dot"></div><div><strong>Buying Trigger</strong> — the event or deadline creating urgency. A board mandate. An active RFP. A recent acquisition.</div></div>
+          <div class="demo-bullet"><div class="demo-bullet-dot"></div><div><strong>Intent Signals</strong> — matched buying signals from your configuration. Your rep knows exactly why this lead was surfaced.</div></div>
+          <div class="demo-bullet"><div class="demo-bullet-dot"></div><div><strong>Sources</strong> — where the intelligence was drawn from: LinkedIn activity, press releases, SEC filings, conference talks.</div></div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="prospect-card">
+          <div class="pc-header">
+            <div>
+              <div class="pc-name">Sarah Chen</div>
+              <div class="pc-role">Chief Data Officer · JPMorgan Chase · enterprise</div>
+            </div>
+            <div class="pc-badge">HIGH INTENT</div>
+          </div>
+          <div class="pc-contact">
+            <div class="pc-contact-row">✉ sarah.chen@jpmchase.com</div>
+            <div class="pc-contact-row">☎ +1-212-555-8734</div>
+            <div class="pc-contact-row">🔗 linkedin.com/in/sarahchen-data</div>
+          </div>
+          <div class="pc-tags">
+            <span class="pc-tag">AI Initiative</span>
+            <span class="pc-tag">Data Lake / Warehouse</span>
+            <span class="pc-tag">Cloud Migration</span>
+          </div>
+          <div class="pc-section">
+            <div class="pc-section-label">AI Challenge</div>
+            <div class="pc-section-text">Struggling to operationalize AI models across legacy data infrastructure with inconsistent data quality across 40+ source systems.</div>
+          </div>
+          <div class="pc-section">
+            <div class="pc-section-label">Buying Trigger</div>
+            <div class="pc-section-text">Board mandate to deploy generative AI across wealth management division by Q3 — creating a hard deadline for data infrastructure modernisation.</div>
+          </div>
+          <div class="pc-section">
+            <div class="pc-section-label">Bio</div>
+            <div class="pc-section-text">Leading data transformation at one of the world's largest financial institutions. Recently spoke at a data governance summit on AI readiness.</div>
+          </div>
+          <div class="pc-sources">
+            <span class="pc-source">LinkedIn activity</span>
+            <span class="pc-source">Conference speaker</span>
+            <span class="pc-source">Industry reports</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── WHO IT'S FOR ──────────────────────────────────────────────── -->
+<section class="personas-bg" id="personas">
+  <div class="section-inner">
+    <div class="section-tag reveal">Who it's for</div>
+    <h2 class="section-title reveal">Built for every<br/>revenue role</h2>
+    <p class="section-sub reveal">APEX gives every member of your revenue team an unfair advantage over competitors still doing research manually.</p>
+    <div class="personas-grid reveal">
+      <div class="persona-card">
+        <div class="persona-num">01</div>
+        <div class="persona-role">Sales Development Reps</div>
+        <div class="persona-desc">Build targeted prospect lists in seconds. Walk into every cold call knowing the prospect's exact pain and why they might buy today.</div>
+        <div class="persona-perks">
+          <div class="persona-perk"><span class="perk-check">✓</span> Replace 7 hours of research with 10 seconds</div>
+          <div class="persona-perk"><span class="perk-check">✓</span> Know the buying trigger before you dial</div>
+          <div class="persona-perk"><span class="perk-check">✓</span> Personalise every outreach with real context</div>
+        </div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-num">02</div>
+        <div class="persona-role">Account Executives</div>
+        <div class="persona-desc">Enter discovery calls with full intelligence — challenge, trigger, signals, and bio already researched. Spend prep time on strategy, not Google.</div>
+        <div class="persona-perks">
+          <div class="persona-perk"><span class="perk-check">✓</span> Walk in knowing their AI challenge</div>
+          <div class="persona-perk"><span class="perk-check">✓</span> Reference the buying trigger in your opener</div>
+          <div class="persona-perk"><span class="perk-check">✓</span> Anchor the conversation in their urgency</div>
+        </div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-num">03</div>
+        <div class="persona-role">Revenue Leaders</div>
+        <div class="persona-desc">Equip your team with an AI research agent that multiplies output without multiplying headcount. Run targeted plays for any vertical on demand.</div>
+        <div class="persona-perks">
+          <div class="persona-perk"><span class="perk-check">✓</span> Launch new vertical plays instantly</div>
+          <div class="persona-perk"><span class="perk-check">✓</span> No new tools, no IT involvement</div>
+          <div class="persona-perk"><span class="perk-check">✓</span> One file, entire team running in minutes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── INTENT SIGNALS ────────────────────────────────────────────── -->
+<section class="signals-bg">
+  <div class="section-inner">
+    <div class="section-tag reveal">Buying signals</div>
+    <h2 class="section-title reveal">8 intent triggers,<br/>fully configurable</h2>
+    <p class="section-sub reveal">Toggle the signals that matter to your sales motion. APEX detects them automatically in every prospect profile it generates.</p>
+    <div class="signals-grid reveal">
+      <div class="signal-pill"><div class="signal-dot"></div><div class="signal-pill-text">AI Initiative</div></div>
+      <div class="signal-pill"><div class="signal-dot"></div><div class="signal-pill-text">Data Migration</div></div>
+      <div class="signal-pill"><div class="signal-dot"></div><div class="signal-pill-text">M&amp;A Activity</div></div>
+      <div class="signal-pill"><div class="signal-dot"></div><div class="signal-pill-text">Cloud Migration</div></div>
+      <div class="signal-pill"><div class="signal-dot"></div><div class="signal-pill-text">Data Lake / Warehouse</div></div>
+      <div class="signal-pill"><div class="signal-dot"></div><div class="signal-pill-text">RFP / RFI</div></div>
+      <div class="signal-pill"><div class="signal-dot"></div><div class="signal-pill-text">HQ Relocation</div></div>
+      <div class="signal-pill"><div class="signal-dot"></div><div class="signal-pill-text">DC Relocation</div></div>
+    </div>
+
+    <!-- Intent tiers -->
+    <div class="tiers-grid reveal">
+      <div class="tier-card tier-high">
+        <div class="tier-badge">HIGH INTENT</div>
+        <div class="tier-title">Active Buyers</div>
+        <div class="tier-desc">Prospects with confirmed, time-bound buying events. Reach these first — the window is open now.</div>
+        <div class="tier-examples">
+          <div class="tier-ex">Board mandates with hard deadlines</div>
+          <div class="tier-ex">Active RFPs in market</div>
+          <div class="tier-ex">Post-M&A integration urgency</div>
+        </div>
+      </div>
+      <div class="tier-card tier-med">
+        <div class="tier-badge">MEDIUM INTENT</div>
+        <div class="tier-title">In-Market Evaluators</div>
+        <div class="tier-desc">Prospects actively evaluating solutions but without a confirmed deadline. Nurture and accelerate.</div>
+        <div class="tier-examples">
+          <div class="tier-ex">Cloud migration initiatives underway</div>
+          <div class="tier-ex">Data lake buildout projects</div>
+          <div class="tier-ex">Vendor evaluation processes</div>
+        </div>
+      </div>
+      <div class="tier-card tier-low">
+        <div class="tier-badge">LOW INTENT</div>
+        <div class="tier-title">Early-Stage Prospects</div>
+        <div class="tier-desc">Prospects with relevant pain but no confirmed timeline. Build relationships for future cycles.</div>
+        <div class="tier-examples">
+          <div class="tier-ex">Early AI strategy exploration</div>
+          <div class="tier-ex">Budget research phase</div>
+          <div class="tier-ex">Watching the market</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── OUTPUT FIELDS ─────────────────────────────────────────────── -->
+<section class="fields-bg">
+  <div class="section-inner">
+    <div class="section-tag reveal">Data richness</div>
+    <h2 class="section-title reveal">15 data points.<br/>Every single profile.</h2>
+    <p class="section-sub reveal">Not just a name and an email. A complete intelligence dossier on every prospect APEX surfaces.</p>
+    <div class="fields-grid reveal">
+      <div class="field-chip"><div class="field-dot fd-green"></div>Full Name</div>
+      <div class="field-chip"><div class="field-dot fd-green"></div>Job Title</div>
+      <div class="field-chip"><div class="field-dot fd-green"></div>Company</div>
+      <div class="field-chip"><div class="field-dot fd-green"></div>Work Email</div>
+      <div class="field-chip"><div class="field-dot fd-blue"></div>Phone Number</div>
+      <div class="field-chip"><div class="field-dot fd-blue"></div>LinkedIn URL</div>
+      <div class="field-chip"><div class="field-dot fd-amber"></div>Intent Score</div>
+      <div class="field-chip"><div class="field-dot fd-amber"></div>Buying Signals</div>
+      <div class="field-chip"><div class="field-dot fd-blue"></div>AI Challenge</div>
+      <div class="field-chip"><div class="field-dot fd-blue"></div>Buying Trigger</div>
+      <div class="field-chip"><div class="field-dot fd-gray"></div>Company Size</div>
+      <div class="field-chip"><div class="field-dot fd-gray"></div>Company Tier</div>
+      <div class="field-chip"><div class="field-dot fd-gray"></div>Industry</div>
+      <div class="field-chip"><div class="field-dot fd-gray"></div>Bio Summary</div>
+      <div class="field-chip"><div class="field-dot fd-gray"></div>Data Sources</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── QUOTE ─────────────────────────────────────────────────────── -->
+<section class="quote-bg">
+  <div class="quote-inner reveal">
+    <div class="quote-mark">"</div>
+    <div class="quote-text">Your competitors are still spending two hours per prospect on LinkedIn. Your team is spending ten seconds — and walking in knowing exactly what pain they're feeling and why they'll buy today.</div>
+    <div class="quote-author">— The Signalarity advantage</div>
+  </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────────────── -->
+<section class="cta-bg" id="cta">
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">Ready to find the<br/><span style="color:var(--blue-lt)">right buyers first?</span></h2>
+    <p class="cta-sub">Request access to APEX and your team will be running enriched prospect research in minutes. One file. No installation. No IT ticket.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" style="font-size:16px;padding:16px 40px" onclick="alert('Contact your Signalarity representative to receive your APEX file.')">Request APEX Access →</button>
+      <button class="btn-ghost" style="font-size:16px;padding:16px 36px" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">See a sample profile</button>
+    </div>
+    <p class="cta-disclaimer">
+      APEX requires an Anthropic API key (console.anthropic.com). Results are AI-generated and should be verified<br/>
+      via LinkedIn Sales Navigator or ZoomInfo before outreach. Comply with CAN-SPAM, GDPR, and CCPA.
+    </p>
+  </div>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────────────────── -->
+<footer>
+  <div>
+    <div class="footer-logo">
+      <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M22,20 C10,35 10,65 22,80" stroke="#1f4a8a" stroke-width="4" stroke-linecap="round"/>
+        <path d="M78,20 C90,35 90,65 78,80" stroke="#1f4a8a" stroke-width="4" stroke-linecap="round"/>
+        <path d="M33,28 C22,39 22,61 33,72" stroke="#1f6feb" stroke-width="5" stroke-linecap="round"/>
+        <path d="M67,28 C78,39 78,61 67,72" stroke="#1f6feb" stroke-width="5" stroke-linecap="round"/>
+        <path d="M43,36 C35,43 35,57 43,64" stroke="#58a6ff" stroke-width="6" stroke-linecap="round"/>
+        <path d="M57,36 C65,43 65,57 57,64" stroke="#58a6ff" stroke-width="6" stroke-linecap="round"/>
+        <line x1="8" y1="50" x2="41" y2="50" stroke="#1f4a8a" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="59" y1="50" x2="92" y2="50" stroke="#1f4a8a" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="10" stroke="#1f6feb" stroke-width="2.5"/>
+        <circle cx="50" cy="50" r="5.5" stroke="#58a6ff" stroke-width="2"/>
+        <circle cx="50" cy="50" r="2.5" fill="#58a6ff"/>
+      </svg>
+      <div>
+        <div class="footer-logo-name">signal<span>arity</span></div>
+        <div class="footer-tagline">AI Sales Intelligence OS</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#demo">Sample profile</a>
+    <a href="#personas">Who it's for</a>
+    <a href="#cta">Get access</a>
+  </div>
+  <div class="footer-copy">© 2026 Signalarity. All rights reserved.</div>
+</footer>
+
+</div><!-- /.site-content -->
+
+<script>
+// ── PASSWORD GATE ──
+// Change this to whatever access code you want to use
+const SITE_PASSCODE = 'apex2026';
+const GATE_KEY = 'sg_gate_v1';
+
+function checkGate() {
+  const val = document.getElementById('gate-input').value.trim();
+  const err = document.getElementById('gate-error');
+  if (val === SITE_PASSCODE) {
+    sessionStorage.setItem(GATE_KEY, '1');
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('site-content').style.display = 'block';
+  } else {
+    err.classList.add('show');
+    const input = document.getElementById('gate-input');
+    input.value = '';
+    input.style.borderColor = '#f85149';
+    input.focus();
+    setTimeout(() => { input.style.borderColor = ''; }, 1200);
+  }
+}
+
+// Auto-pass if already authenticated this session
+(function() {
+  if (sessionStorage.getItem(GATE_KEY) === '1') {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('site-content').style.display = 'block';
+  }
+})();
+
+document.getElementById('gate-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkGate();
+});
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Nav bg on scroll
+const nav = document.querySelector('nav');
+window.addEventListener('scroll', () => {
+  nav.style.background = window.scrollY > 60
+    ? 'rgba(6,10,18,0.98)'
+    : 'rgba(6,10,18,0.85)';
+});
+</script>
+</body>
+</html>
