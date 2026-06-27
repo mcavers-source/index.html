@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KRYSTL — AI Sales Intelligence</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #010409; color: #e6edf3; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  a { color: #58a6ff; }
+
+  /* Welcome overlay */
+  .welcome-overlay { position: fixed; inset: 0; background: rgba(1,4,9,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .welcome-box { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 36px 40px; max-width: 520px; width: 90%; }
+  .welcome-logo { font-size: 22px; font-weight: 700; color: #58a6ff; letter-spacing: .1em; margin-bottom: 4px; }
+  .welcome-sub { font-size: 11px; color: #8b949e; letter-spacing: .16em; margin-bottom: 24px; }
+  .welcome-box p { font-size: 13px; color: #8b949e; line-height: 1.7; margin-bottom: 16px; }
+  .key-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .key-label { font-size: 11px; color: #6e7681; width: 100px; flex-shrink: 0; }
+  .key-input { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 13px; padding: 8px 10px; outline: none; font-family: monospace; }
+  .key-input:focus { border-color: #58a6ff; }
+  .key-input.optional { border-style: dashed; }
+  .key-note { font-size: 11px; color: #6e7681; margin-bottom: 20px; line-height: 1.6; }
+  .welcome-btn { width: 100%; background: #1f6feb; border: none; color: #fff; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .welcome-btn:hover { background: #388bfd; }
+  .badge-opt { font-size: 10px; background: #1f6feb22; color: #58a6ff; border: 1px solid #1f6feb44; border-radius: 10px; padding: 1px 6px; margin-left: 4px; }
+
+  /* Layout */
+  .shell { display: flex; flex: 1; overflow: hidden; }
+  .sidebar { width: 200px; flex-shrink: 0; background: #0d1117; border-right: 1px solid #30363d; display: flex; flex-direction: column; }
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .logo { padding: 16px; border-bottom: 1px solid #30363d; }
+  .logo-name { font-size: 15px; font-weight: 700; color: #58a6ff; letter-spacing: .08em; }
+  .logo-sub { font-size: 9px; color: #8b949e; letter-spacing: .14em; margin-top: 2px; }
+  .nav-section { padding: 12px 16px 4px; font-size: 10px; color: #8b949e; letter-spacing: .1em; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; font-size: 13px; color: #8b949e; cursor: pointer; }
+  .nav-item:hover { background: #161b22; color: #e6edf3; }
+  .nav-item.active { background: #161b22; color: #58a6ff; }
+  .nav-badge { margin-left: auto; background: #388bfd33; color: #58a6ff; font-size: 10px; padding: 1px 6px; border-radius: 10px; }
+  .online { display: flex; align-items: center; gap: 7px; padding: 14px 16px; margin-top: auto; font-size: 12px; color: #3fb950; border-top: 1px solid #30363d; }
+  .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #3fb950; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid #30363d; }
+  .topbar h1 { font-size: 15px; font-weight: 500; }
+  .top-right { display: flex; align-items: center; gap: 8px; }
+  .api-pills { display: flex; gap: 5px; }
+  .api-pill { font-size: 10px; padding: 3px 8px; border-radius: 10px; border: 1px solid; font-weight: 500; }
+  .api-pill.active   { background: rgba(63,185,80,.12); color: #3fb950; border-color: rgba(63,185,80,.3); }
+  .api-pill.inactive { background: rgba(248,81,73,.1);  color: #8b949e;  border-color: #30363d; }
+  .btn { padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .btn-ghost { background: transparent; border: 1px solid #30363d; color: #8b949e; }
+  .btn-ghost:hover { border-color: #58a6ff; color: #58a6ff; }
+  .btn-primary { background: #1f6feb; border: none; color: #fff; }
+  .btn-primary:hover { background: #388bfd; }
+
+  .metrics { display: grid; grid-template-columns: repeat(4,1fr); border-bottom: 1px solid #30363d; }
+  .metric { padding: 10px 16px; border-right: 1px solid #30363d; }
+  .metric:last-child { border-right: none; }
+  .metric-label { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+  .metric-val { font-size: 20px; font-weight: 500; }
+  .metric-sub { font-size: 10px; color: #6e7681; margin-top: 2px; }
+
+  .body { display: flex; flex: 1; overflow: hidden; }
+  .center { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #30363d; overflow: hidden; }
+  .panel-head { padding: 6px 14px; border-bottom: 1px solid #30363d; font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: .07em; flex-shrink: 0; }
+  .log { height: 150px; overflow-y: auto; padding: 8px 14px; font-size: 12px; font-family: 'Consolas','Courier New',monospace; background: #010409; line-height: 1.9; flex-shrink: 0; }
+  .lt{color:#6e7681}.li{color:#8b949e}.lk{color:#58a6ff;font-weight:700}.ls{color:#3fb950}.lw{color:#d29922}.le{color:#f85149}.lv{color:#a78bfa}
+
+  .results-wrap { flex:1; display:flex; flex-direction:column; overflow:hidden; border-top:1px solid #30363d; }
+  .results-scroll { flex:1; overflow-y:auto; padding:10px 14px; display:grid; grid-template-columns:1fr 1fr; gap:10px; align-content:start; }
+
+  /* Prospect card */
+  .pcard { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:13px 14px; display:flex; flex-direction:column; gap:7px; position:relative; }
+  .pcard.high   { border-left:3px solid #3fb950; }
+  .pcard.medium { border-left:3px solid #d29922; }
+  .pcard.low    { border-left:3px solid #58a6ff; }
+  .pc-head { display:flex; justify-content:space-between; align-items:flex-start; gap:6px; }
+  .pc-name { font-size:13px; font-weight:700; }
+  .pc-role { font-size:11px; color:#8b949e; margin-top:1px; }
+  .intent-badge { font-size:9px; font-weight:700; padding:2px 7px; border-radius:10px; white-space:nowrap; flex-shrink:0; letter-spacing:.5px; }
+  .badge-HIGH   { background:rgba(63,185,80,.15); color:#3fb950; border:.5px solid rgba(63,185,80,.3); }
+  .badge-MEDIUM { background:rgba(210,153,34,.15); color:#d29922; border:.5px solid rgba(210,153,34,.3); }
+  .badge-LOW    { background:rgba(88,166,255,.12); color:#58a6ff; border:.5px solid rgba(88,166,255,.25); }
+  .pc-contact { display:flex; flex-direction:column; gap:3px; }
+  .pc-cr { font-size:11px; display:flex; align-items:center; gap:5px; }
+  .pc-cr.verified { color:#3fb950; }
+  .pc-cr.ai-gen   { color:#58a6ff; }
+  .verified-badge { font-size:9px; background:rgba(63,185,80,.15); color:#3fb950; border-radius:4px; padding:0 4px; border:.5px solid rgba(63,185,80,.3); }
+  .ai-badge       { font-size:9px; background:rgba(88,166,255,.12); color:#58a6ff; border-radius:4px; padding:0 4px; border:.5px solid rgba(88,166,255,.25); }
+  .pc-tags { display:flex; flex-wrap:wrap; gap:4px; }
+  .pc-tag { font-size:9px; padding:2px 7px; border-radius:10px; background:rgba(31,111,235,.12); color:#58a6ff; border:.5px solid rgba(31,111,235,.2); }
+  .pc-tag.real { background:rgba(63,185,80,.1); color:#3fb950; border-color:rgba(63,185,80,.25); }
+  .pc-sl { font-size:9px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:#6e7681; margin-bottom:2px; }
+  .pc-st { font-size:11px; color:#c9d1d9; line-height:1.55; }
+  .pc-sources { display:flex; flex-wrap:wrap; gap:4px; border-top:.5px solid #30363d; padding-top:7px; }
+  .pc-source { font-size:9px; padding:1px 6px; border-radius:10px; background:rgba(255,255,255,.04); color:#6e7681; border:.5px solid #30363d; }
+  .enrichment-strip { background:#0d1117; border-top:.5px solid #30363d; padding:5px 8px; display:flex; gap:5px; flex-wrap:wrap; }
+  .enr-tag { font-size:9px; padding:2px 7px; border-radius:8px; display:flex; align-items:center; gap:3px; }
+  .enr-apollo { background:rgba(251,146,60,.1); color:#fb923c; border:.5px solid rgba(251,146,60,.25); }
+  .enr-crunch { background:rgba(167,139,250,.1); color:#a78bfa; border:.5px solid rgba(167,139,250,.25); }
+  .enr-edgar  { background:rgba(34,211,238,.1); color:#22d3ee; border:.5px solid rgba(34,211,238,.25); }
+
+  /* Config */
+  .cfg { width:245px; flex-shrink:0; overflow-y:auto; padding:12px 14px; background:#0d1117; }
+  .cfg-section { margin-bottom:11px; }
+  .cfg-label { font-size:10px; color:#8b949e; letter-spacing:.08em; text-transform:uppercase; margin-bottom:5px; }
+  .cfg-input { width:100%; background:#161b22; border:1px solid #30363d; border-radius:6px; color:#e6edf3; font-size:13px; padding:6px 10px; outline:none; font-family:inherit; }
+  .cfg-input:focus { border-color:#58a6ff; }
+  select.cfg-input { cursor:pointer; appearance:none; }
+  textarea.cfg-input { resize:none; min-height:48px; font-size:12px; }
+  .signals-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:11px; }
+  .sig-btn { display:flex; align-items:center; gap:5px; background:#161b22; border:1px solid #30363d; border-radius:6px; padding:5px 8px; cursor:pointer; font-size:11px; color:#8b949e; user-select:none; }
+  .sig-btn.on { border-color:#388bfd; color:#58a6ff; background:rgba(31,111,235,.1); }
+  .sdot { width:6px; height:6px; border-radius:50%; background:#30363d; flex-shrink:0; }
+  .sig-btn.on .sdot { background:#58a6ff; }
+  .launch-btn { width:100%; background:linear-gradient(135deg,#1f6feb,#388bfd); border:none; color:#fff; padding:10px; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer; margin-bottom:8px; font-family:inherit; }
+  .launch-btn:hover { opacity:.9; }
+  .launch-btn:disabled { opacity:.45; cursor:not-allowed; }
+  .disclaimer { font-size:10px; color:#6e7681; background:#161b22; border-radius:6px; padding:7px 9px; line-height:1.5; border:1px solid #30363d; }
+  .empty { grid-column:1/-1; text-align:center; padding:32px 0; font-size:13px; color:#6e7681; }
+  .dots { display:inline-flex; gap:3px; align-items:center; }
+  .dots span { width:4px; height:4px; border-radius:50%; background:#3fb950; animation:bop 1s infinite; }
+  .dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+  @keyframes bop{0%,80%,100%{opacity:.3;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
+
+  .enrich-progress { background:#0d1117; border-top:1px solid #30363d; padding:8px 14px; font-size:11px; color:#8b949e; display:none; }
+  .enrich-progress.show { display:flex; align-items:center; gap:8px; }
+
+  /* Settings panel */
+  .settings-panel {
+    display: none; position: fixed; top: 0; right: 0; bottom: 0;
+    width: 320px; background: #0d1117; border-left: 1px solid #30363d;
+    z-index: 50; flex-direction: column; overflow-y: auto;
+    box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+  }
+  .settings-panel.open { display: flex; }
+  .settings-panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid #30363d; flex-shrink: 0;
+    font-size: 13px; font-weight: 600;
+  }
+  .settings-close { background: none; border: none; color: #8b949e; font-size: 20px; cursor: pointer; padding: 0 4px; }
+  .settings-close:hover { color: #e6edf3; }
+  .settings-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .settings-group-title { font-size: 10px; color: #6e7681; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+  .settings-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+  .settings-row { padding: 10px 14px; border-bottom: 1px solid #30363d; }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row-label { font-size: 13px; color: #e6edf3; margin-bottom: 2px; }
+  .settings-row-sub { font-size: 11px; color: #6e7681; }
+  .settings-field {
+    width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+    color: #e6edf3; font-size: 12px; padding: 7px 10px; outline: none;
+    font-family: monospace; margin-top: 7px;
+  }
+  .settings-field:focus { border-color: #58a6ff; }
+  .proxy-status { font-size: 11px; margin-top: 5px; }
+  .settings-save-btn {
+    width: 100%; background: #1f6feb; border: none; color: #fff; padding: 10px;
+    border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;
+  }
+  .settings-save-btn:hover { background: #388bfd; }
+
+  /* Salesforce Integration */
+  .sf-bar {
+    display:none; align-items:center; justify-content:space-between;
+    padding:8px 20px; background:#0a1628; border-bottom:1px solid #1a2d50;
+    font-size:12px; flex-shrink:0;
+  }
+  .sf-bar.show { display:flex; }
+  .sf-left { display:flex; align-items:center; gap:10px; }
+  .sf-logo { font-size:11px; font-weight:700; color:#00a1e0; letter-spacing:.5px; }
+  .sf-status { font-size:11px; color:#8b949e; }
+  .sf-status.connected { color:#3fb950; }
+  .sf-push-btn {
+    background:#00a1e0; border:none; color:#fff; font-family:inherit;
+    font-size:12px; font-weight:500; padding:5px 14px; border-radius:6px; cursor:pointer;
+  }
+  .sf-push-btn:hover { background:#0089c0; }
+  .sf-push-btn:disabled { opacity:.45; cursor:not-allowed; }
+  .sf-disconnect { background:none; border:1px solid #30363d; color:#8b949e;
+    font-family:inherit; font-size:11px; padding:4px 10px; border-radius:6px; cursor:pointer; }
+  .sf-disconnect:hover { border-color:#f85149; color:#f85149; }
+
+  /* SF settings section */
+  .sf-settings-card { background:#0a1628; border:1px solid #1a2d50; border-radius:8px; overflow:hidden; }
+  .sf-settings-head { padding:10px 14px; border-bottom:1px solid #1a2d50;
+    font-size:12px; font-weight:600; color:#00a1e0; letter-spacing:.5px; }
+  .sf-callback-note { font-size:11px; color:#6e7681; background:#161b22; border:1px solid #30363d;
+    border-radius:6px; padding:8px 10px; line-height:1.6; margin-top:6px; }
+  .sf-connect-btn {
+    width:100%; background:#00a1e0; border:none; color:#fff;
+    font-family:inherit; font-size:13px; font-weight:500; padding:10px;
+    border-radius:6px; cursor:pointer; margin-top:8px;
+  }
+  .sf-connect-btn:hover { background:#0089c0; }
+  .sf-connect-btn:disabled { opacity:.45; }
+
+  .sidebar-settings-btn {
+    display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+    font-size: 13px; color: #8b949e; cursor: pointer; border-top: 1px solid #30363d;
+    flex-shrink: 0;
+  }
+  .sidebar-settings-btn:hover { background: #161b22; color: #e6edf3; }
+  .progress-bar-wrap { flex:1; height:4px; background:#30363d; border-radius:2px; overflow:hidden; }
+  .progress-bar { height:100%; background:linear-gradient(90deg,#1f6feb,#3fb950); border-radius:2px; width:0%; transition:width .3s ease; }
+</style>
+<script>
+// Run before page renders — hide welcome screen for SF OAuth callback
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('code') && p.get('state') !== null) {
+    // Inject a style to immediately hide the welcome overlay
+    const s = document.createElement('style');
+    s.textContent = '#welcome-overlay { display: none !important; }';
+    document.head.appendChild(s);
+  }
+})();
+</script>
+</head>
+<body>
+
+<!-- Welcome Modal -->
+<div class="welcome-overlay" id="welcome-overlay">
+  <div class="welcome-box">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
+        <polygon points="50,4 72,28 50,48 28,28" fill="#1d4ed8"/>
+        <polygon points="50,4 28,28 22,52 50,48" fill="#3b82f6"/>
+        <polygon points="50,4 72,28 78,52 50,48" fill="#1e40af"/>
+        <polygon points="28,28 22,52 50,48" fill="#60a5fa"/>
+        <polygon points="22,52 50,96 50,48" fill="#2563eb"/>
+        <polygon points="78,52 50,48 50,96" fill="#1e40af"/>
+        <polygon points="44,48 56,48 50,58" fill="#93c5fd"/>
+      </svg>
+      <div class="welcome-logo">KRYST<span style="color:#58a6ff">L</span></div>
+    </div>
+    <div class="welcome-sub">SALES INTELLIGENCE OS · ENRICHED EDITION</div>
+    <p>Enter your API keys below. Only the Anthropic key is required — Apollo, Crunchbase, and SEC EDGAR are optional enrichment layers that add verified real-time data to every prospect.</p>
+
+    <div class="key-row">
+      <span class="key-label">Anthropic <span style="color:#f85149">*</span></span>
+      <input class="key-input" type="password" id="k-anthropic" placeholder="sk-ant-..." autocomplete="off"/>
+    </div>
+    <div class="key-row">
+      <span class="key-label">Apollo.io <span class="badge-opt">optional</span></span>
+      <input class="key-input key-input optional" type="password" id="k-apollo" placeholder="Apollo API key" autocomplete="off"/>
+    </div>
+    <div class="key-row">
+      <span class="key-label">Crunchbase <span class="badge-opt">optional</span></span>
+      <input class="key-input key-input optional" type="password" id="k-crunch" placeholder="Crunchbase API key" autocomplete="off"/>
+    </div>
+    <div class="key-row" style="margin-bottom:16px">
+      <span class="key-label">SEC EDGAR <span class="badge-opt">free</span></span>
+      <input class="key-input key-input optional" type="text" id="k-edgar" placeholder="your@email.com (required by SEC)" autocomplete="off"/>
+    </div>
+    <div class="key-row" style="margin-bottom:16px">
+      <span class="key-label">Proxy URL <span class="badge-opt">required for enrich</span></span>
+      <input class="key-input key-input optional" type="text" id="k-proxy" placeholder="https://your-proxy.railway.app" autocomplete="off"/>
+    </div>
+    <p class="key-note">Keys are stored in session memory only — never transmitted anywhere except their respective APIs. The Proxy URL is your deployed KRYSTL proxy server (see implementation guide) — required for Apollo, Crunchbase and EDGAR enrichment. SEC EDGAR requires your email address per their fair-use policy.</p>
+    <button class="welcome-btn" onclick="startApp()">Launch KRYSTL →</button>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="sidebar">
+    <div class="logo"><div class="logo-name">KRYST<span style="color:#58a6ff">L</span></div><div class="logo-sub">SALES INTELLIGENCE OS</div></div>
+    <div class="nav-section">Workspace</div>
+    <div class="nav-item active">&#128301; Research Agents <span class="nav-badge">9</span></div>
+    <div class="nav-item">&#128100; Prospects</div>
+    <div class="nav-item">&#9889; Intent Signals</div>
+    <div class="nav-section">Intelligence</div>
+    <div class="nav-item">&#129504; AI / Data Readiness</div>
+    <div class="nav-item">&#128200; Market Signals</div>
+    <div class="nav-item">&#128202; Analytics</div>
+    <div class="sidebar-settings-btn" onclick="toggleSettings()">&#9881; Settings &amp; API Keys</div>
+    <div class="online"><div class="online-dot"></div> Agents Online</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>&#128301; Research Agents</h1>
+      <div class="top-right">
+        <div class="api-pills">
+          <div class="api-pill inactive" id="pill-apollo">Apollo</div>
+          <div class="api-pill inactive" id="pill-crunch">Crunchbase</div>
+          <div class="api-pill inactive" id="pill-edgar">SEC EDGAR</div>
+        </div>
+        <button class="btn btn-ghost" onclick="clearAll()">&#8635; Clear</button>
+        <button class="btn btn-primary" onclick="exportCSV()">&#8615; Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Salesforce Integration Bar -->
+    <div class="sf-bar" id="sf-bar">
+      <div class="sf-left">
+        <span class="sf-logo">&#9749; SALESFORCE</span>
+        <span class="sf-status" id="sf-status">Not connected</span>
+        <div class="api-pills" style="margin-left:4px">
+          <div class="api-pill inactive" id="sf-pill">SF</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="sf-push-count" style="font-size:11px;color:#8b949e"></span>
+        <button class="sf-push-btn" id="sf-push-btn" onclick="sfPushAll()" style="display:none">
+          &#8648; Push to Salesforce
+        </button>
+        <button class="sf-disconnect" onclick="sfDisconnect()">Disconnect</button>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Prospects Found</div><div class="metric-val" id="m-found">0</div><div class="metric-sub">this session</div></div>
+      <div class="metric"><div class="metric-label">Verified Emails</div><div class="metric-val" id="m-email">0</div><div class="metric-sub">by Apollo</div></div>
+      <div class="metric"><div class="metric-label">Funding Events</div><div class="metric-val" id="m-fund">0</div><div class="metric-sub">by Crunchbase</div></div>
+      <div class="metric"><div class="metric-label">SEC Filings</div><div class="metric-val" id="m-sec">0</div><div class="metric-sub">8-K triggers</div></div>
+    </div>
+
+    <div class="body">
+      <div class="center">
+        <div class="panel-head">&#9646; Agent Log</div>
+        <div class="log" id="log">
+          <div><span class="lt">[--:--:-- --]</span> <span class="li">Enter your API key(s) and configure targets, then launch.</span></div>
+        </div>
+        <div class="enrich-progress" id="enrich-progress">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span id="enrich-label">Enriching prospects...</span>
+          <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+          <span id="enrich-pct">0%</span>
+        </div>
+        <div class="results-wrap">
+          <div class="panel-head">&#9646; Intelligence Results</div>
+          <div class="results-scroll" id="results-grid">
+            <div class="empty">Configure your targets and launch the agent.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cfg">
+        <div class="cfg-section">
+          <div class="cfg-label">Target Industry</div>
+          <select id="cfg-industry" class="cfg-input">
+            <option>Financial Services</option><option>Healthcare</option>
+            <option>Technology</option><option>Manufacturing</option>
+            <option>Insurance</option><option>Retail</option>
+          </select>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-label">Company Size</div>
+          <select id="cfg-size" class="cfg-input">
+            <option>Enterprise (1000+ employees)</option>
+            <option>Mid-Market (200-999)</option>
+            <option>SMB (10-199)</option>
+          </select>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-label">Geography</div>
+          <select id="cfg-geo" class="cfg-input">
+            <option>Northeast United States</option><option>Southeast United States</option>
+            <option>West Coast</option><option>Midwest</option><option>Europe</option>
+          </select>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-label">Target Titles</div>
+          <input type="text" id="cfg-titles" class="cfg-input" value="CTO, CDO, VP of Data, VP of IT"/>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-label">Keywords / Focus</div>
+          <textarea id="cfg-keywords" class="cfg-input">unstructured data, AI readiness, data governance</textarea>
+        </div>
+        <div class="cfg-label" style="margin-bottom:6px">Buying Intent Signals</div>
+        <div class="signals-grid">
+          <div class="sig-btn on" data-sig="AI Initiative"><div class="sdot"></div>AI Initiative</div>
+          <div class="sig-btn on" data-sig="Data Migration"><div class="sdot"></div>Data Migration</div>
+          <div class="sig-btn on" data-sig="M&A Activity"><div class="sdot"></div>M&amp;A Activity</div>
+          <div class="sig-btn on" data-sig="Cloud Migration"><div class="sdot"></div>Cloud Migration</div>
+          <div class="sig-btn on" data-sig="Data Lake / Warehouse"><div class="sdot"></div>Data Lake</div>
+          <div class="sig-btn on" data-sig="RFP / RFI"><div class="sdot"></div>RFP / RFI</div>
+          <div class="sig-btn on" data-sig="HQ Relocation"><div class="sdot"></div>HQ Relocation</div>
+          <div class="sig-btn on" data-sig="DC Relocation"><div class="sdot"></div>DC Relocation</div>
+        </div>
+        <button class="launch-btn" id="launch-btn" onclick="runAgents()">&#10022; Launch Intelligence Agent</button>
+        <div class="disclaimer">&#9888; Profiles are grounded in real company knowledge + web data. Enrichment APIs verify contacts. Always confirm before outreach.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Panel -->
+<div class="settings-panel" id="settings-panel">
+  <div class="settings-panel-head">
+    <span>&#9881; Settings &amp; API Keys</span>
+    <button class="settings-close" onclick="toggleSettings()">&#215;</button>
+  </div>
+  <div class="settings-body">
+
+    <div>
+      <div class="settings-group-title">Proxy Server</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-label">Proxy URL</div>
+          <div class="settings-row-sub">Required for Apollo &amp; SEC EDGAR. Use your Bonto/Render URL.</div>
+          <input type="text" id="s-proxy" class="settings-field"
+            placeholder="https://apex-proxy.bonto.run"
+            oninput="liveProxyUpdate()"/>
+          <div class="proxy-status" id="proxy-status-msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="settings-group-title">Enrichment API Keys</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-label">Apollo.io API Key</div>
+          <div class="settings-row-sub">For verified emails &amp; phones</div>
+          <input type="password" id="s-apollo" class="settings-field"
+            placeholder="Apollo API key"
+            oninput="KEY.apollo=this.value.trim();updatePills()"/>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-label">Crunchbase User Key</div>
+          <div class="settings-row-sub">For funding &amp; M&amp;A data</div>
+          <input type="password" id="s-crunch" class="settings-field"
+            placeholder="Crunchbase user_key"
+            oninput="KEY.crunch=this.value.trim();updatePills()"/>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-label">SEC EDGAR Email</div>
+          <div class="settings-row-sub">Required by SEC fair-use policy</div>
+          <input type="text" id="s-edgar" class="settings-field"
+            placeholder="your@email.com"
+            oninput="KEY.edgar=this.value.trim()"/>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="settings-group-title">Model</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-label">Claude Model</div>
+          <div class="settings-row-sub" style="color:#3fb950">claude-sonnet-4-6</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-label">Anthropic Key</div>
+          <div class="settings-row-sub" id="s-key-preview">Not set</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="settings-group-title">Salesforce Integration</div>
+      <div class="sf-settings-card">
+        <div class="sf-settings-head">&#9749; Salesforce Developer Sandbox</div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <div class="settings-row-label">Consumer Key (Client ID)</div>
+          <div class="settings-row-sub">From your Salesforce External Client App or Connected App</div>
+          <input type="text" id="s-sf-key" class="settings-field" placeholder="3MVG9..." autocomplete="off"/>
+        </div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <div class="settings-row-label">Consumer Secret</div>
+          <input type="password" id="s-sf-secret" class="settings-field" placeholder="Consumer secret" autocomplete="off"/>
+        </div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <div class="settings-row-label">Environment</div>
+          <select id="s-sf-env" class="settings-field" style="font-family:inherit">
+            <option value="sandbox">Sandbox / Developer Org (test.salesforce.com)</option>
+            <option value="production">Production (login.salesforce.com)</option>
+          </select>
+        </div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <div class="settings-row-label">Callback URL</div>
+          <div class="settings-row-sub">This must match EXACTLY what is registered in your Salesforce ECA. Copy it from here and paste it into Salesforce — do not type it manually.</div>
+          <div style="display:flex;gap:6px;width:100%;align-items:center">
+            <input type="text" id="sf-callback-display"
+              style="flex:1;background:#0d1117;border:1px solid #1a2d50;border-radius:6px;color:#00a1e0;font-size:12px;padding:7px 10px;outline:none;font-family:monospace;cursor:text"
+              readonly/>
+            <button onclick="copySfCallback()" style="background:#1a2d50;border:none;color:#00a1e0;font-family:inherit;font-size:11px;padding:7px 12px;border-radius:6px;cursor:pointer;white-space:nowrap">Copy</button>
+          </div>
+          <div class="settings-row-sub" style="color:#d29922">&#9888; If you get a redirect_uri_mismatch error, the URL above must be pasted into your Salesforce ECA Callback URL field exactly as shown — including https:// and any path.</div>
+          <div class="settings-row-sub" style="margin-top:4px">&#128712; Override (if the auto-detected URL is wrong):</div>
+          <input type="text" id="sf-callback-override"
+            style="width:100%;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:12px;padding:7px 10px;outline:none;font-family:monospace"
+            placeholder="Leave blank to use auto-detected URL above"
+            oninput="sfShowCallbackUrl()"/>
+        </div>
+        <div class="settings-row" style="padding-bottom:14px">
+          <button class="sf-connect-btn" id="sf-connect-btn" onclick="sfConnect()">
+            &#9749; Connect to Salesforce
+          </button>
+          <div id="sf-connect-status" style="font-size:11px;margin-top:6px;color:#8b949e"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="settings-save-btn" onclick="saveSettings()">&#10003; Save &amp; Close</button>
+
+  </div>
+</div>
+
+<script>
+// ── Keys ──────────────────────────────────────────────────────────────────
+let KEY = { anthropic:'', apollo:'', crunch:'', edgar:'', proxy:'' };
+let prospects = [];
+
+document.querySelectorAll('.sig-btn').forEach(b => b.onclick = () => b.classList.toggle('on'));
+
+function startApp() {
+  const k = document.getElementById('k-anthropic').value.trim();
+  if (!k.startsWith('sk-')) { alert('Please enter a valid Anthropic API key.'); return; }
+  KEY.anthropic = k;
+  // Store Anthropic key in session so SF callback can restore it
+  sessionStorage.setItem('sf_anthropic_key', k);
+  KEY.apollo  = document.getElementById('k-apollo').value.trim();
+  KEY.crunch  = document.getElementById('k-crunch').value.trim();
+  KEY.edgar   = document.getElementById('k-edgar').value.trim();
+  KEY.proxy   = document.getElementById('k-proxy').value.trim().replace(/\/$/,'');
+  document.getElementById('welcome-overlay').style.display = 'none';
+  updatePills();
+  // Sync proxy from settings field too in case it was set there
+  const settingsProxy = document.getElementById('proxy-url-setting');
+  if (settingsProxy && settingsProxy.value.trim()) {
+    KEY.proxy = settingsProxy.value.trim().replace(/\/$/,'');
+  }
+  log(`Proxy: ${KEY.proxy || 'NOT SET — go to Settings tab to add proxy URL'}`, KEY.proxy ? 'ls' : 'lw');
+  if (!KEY.proxy) log('⚠ Without a proxy, Apollo and SEC EDGAR will fail to fetch', 'lw');
+  log('API keys loaded. Enrichment layers: ' +
+    [KEY.apollo?'Apollo':'',KEY.crunch?'Crunchbase':'',KEY.edgar?'SEC EDGAR':''].filter(Boolean).join(', ') || 'none (Anthropic only)', 'ls');
+}
+
+function updateProxyFromSettings() {
+  const val = document.getElementById('proxy-url-setting').value.trim().replace(/\/$/,'');
+  KEY.proxy = val;
+  const status = document.getElementById('proxy-status-row');
+  if (val) {
+    status.textContent = '✓ Proxy set — Apollo & SEC EDGAR will route through ' + val;
+    status.style.color = '#3fb950';
+    // Also sync back to welcome modal field if visible
+    const wf = document.getElementById('k-proxy');
+    if (wf) wf.value = val;
+  } else {
+    status.textContent = '⚠ No proxy set — enrichment APIs will fail';
+    status.style.color = '#d29922';
+  }
+  updatePills();
+}
+
+function toggleSettings() {
+  const p = document.getElementById('settings-panel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) {
+    // Pre-fill from current KEY state
+    document.getElementById('s-proxy').value  = KEY.proxy  || '';
+    document.getElementById('s-apollo').value = KEY.apollo || '';
+    document.getElementById('s-crunch').value = KEY.crunch || '';
+    document.getElementById('s-edgar').value  = KEY.edgar  || '';
+    document.getElementById('s-key-preview').textContent = KEY.anthropic
+      ? 'sk-ant-···' + KEY.anthropic.slice(-4) : 'Not set';
+    liveProxyUpdate();
+  }
+}
+
+function liveProxyUpdate() {
+  const val = document.getElementById('s-proxy').value.trim().replace(/\/$/,'');
+  KEY.proxy = val;
+  const msg = document.getElementById('proxy-status-msg');
+  if (val) {
+    msg.textContent = '✓ ' + val;
+    msg.style.color = '#3fb950';
+  } else {
+    msg.textContent = '⚠ No proxy — Apollo & SEC EDGAR will fail';
+    msg.style.color = '#d29922';
+  }
+  updatePills();
+}
+
+function saveSettings() {
+  KEY.proxy  = (document.getElementById('s-proxy').value  || '').trim().replace(/\/$/,'');
+  KEY.apollo = (document.getElementById('s-apollo').value || '').trim();
+  KEY.crunch = (document.getElementById('s-crunch').value || '').trim();
+  KEY.edgar  = (document.getElementById('s-edgar').value  || '').trim();
+  updatePills();
+  document.getElementById('settings-panel').classList.remove('open');
+  log(`Settings saved. Proxy: ${KEY.proxy || 'not set'}`, KEY.proxy ? 'ls' : 'lw');
+}
+
+function updatePills() {
+  document.getElementById('pill-apollo').className = 'api-pill ' + (KEY.apollo ? 'active' : 'inactive');
+  document.getElementById('pill-crunch').className = 'api-pill ' + (KEY.crunch ? 'active' : 'inactive');
+  document.getElementById('pill-edgar').className  = 'api-pill ' + (KEY.edgar  ? 'active' : 'inactive');
+}
+
+function ts() {
+  const d=new Date(),h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),s=String(d.getSeconds()).padStart(2,'0'),ap=h>=12?'PM':'AM';
+  return `${h%12||12}:${m}:${s} ${ap}`;
+}
+function log(msg,cls='li') {
+  const el=document.getElementById('log');
+  const div=document.createElement('div');
+  div.innerHTML=`<span class="lt">[${ts()}]</span> <span class="${cls}">${msg}</span>`;
+  el.appendChild(div); el.scrollTop=el.scrollHeight;
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function updateMetrics() {
+  document.getElementById('m-found').textContent = prospects.length;
+  document.getElementById('m-email').textContent = prospects.filter(p=>p._apollo?.email).length;
+  document.getElementById('m-fund').textContent  = prospects.filter(p=>p._crunch?.funding).length;
+  document.getElementById('m-sec').textContent   = prospects.filter(p=>p._edgar?.filings?.length).length;
+}
+
+// ── APOLLO ENRICHMENT ─────────────────────────────────────────────────────
+// Apollo People Search: POST https://api.apollo.io/v1/people/search
+// Matches by name + company, returns verified email, phone, LinkedIn
+async function enrichApollo(prospect) {
+  if (!KEY.apollo) return;
+  try {
+    log(`&#128308; Apollo: searching for <span class="lk">${prospect.name}</span>...`, 'lv');
+    const apolloUrl = KEY.proxy
+      ? `${KEY.proxy}/apollo/people/search`
+      : 'https://api.apollo.io/v1/people/search';
+    const res = await fetch(apolloUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        'X-Api-Key': KEY.apollo
+      },
+      body: JSON.stringify({
+        q_keywords: prospect.name,
+        q_organization_name: prospect.company,
+        page: 1,
+        per_page: 1
+      })
+    });
+    if (!res.ok) { log(`Apollo HTTP ${res.status} for ${prospect.name}`, 'lw'); return; }
+    const data = await res.json();
+    const person = data?.people?.[0];
+    if (person) {
+      prospect._apollo = {
+        email:    person.email || null,
+        phone:    person.phone_numbers?.[0]?.sanitized_number || null,
+        linkedin: person.linkedin_url || null,
+        title:    person.title || null,
+        verified: true
+      };
+      // Override AI-generated contact fields with verified data
+      if (person.email)    prospect.email    = person.email;
+      if (person.linkedin_url) prospect.linkedin = person.linkedin_url;
+      log(`&#10003; Apollo verified: <span class="ls">${prospect.name}</span> — ${person.email || 'no email found'}`, 'ls');
+    } else {
+      log(`Apollo: no match found for ${prospect.name}`, 'lw');
+    }
+  } catch(e) {
+    log(`Apollo error: ${e.message}`, 'le');
+  }
+}
+
+// ── CRUNCHBASE ENRICHMENT ─────────────────────────────────────────────────
+// Crunchbase Basic API: GET https://api.crunchbase.com/api/v4/entities/organizations/{permalink}
+// Returns funding rounds, acquisitions, employee count
+async function enrichCrunchbase(prospect) {
+  if (!KEY.crunch) return;
+  try {
+    const slug = prospect.company.toLowerCase()
+      .replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-')
+      .replace(/-inc$|-llc$|-corp$|-ltd$/,'');
+    log(`&#128312; Crunchbase: searching <span class="lk">${prospect.company}</span>...`, 'lv');
+    // Search for the organisation first
+    const crunchUrl = KEY.proxy
+      ? `${KEY.proxy}/crunchbase/searches/organizations?user_key=${KEY.crunch}`
+      : `https://api.crunchbase.com/api/v4/searches/organizations?user_key=${KEY.crunch}`;
+    const searchRes = await fetch(crunchUrl,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          field_ids: ['identifier','short_description','funding_total','last_funding_type','last_funding_at','num_funding_rounds','num_employees_enum','ipo_status','acquired_by'],
+          query: [{ type:'predicate', field_id:'facet_ids', operator_id:'includes', values:['company'] },
+                  { type:'predicate', field_id:'name', operator_id:'contains', values:[prospect.company] }],
+          limit: 1
+        })
+      }
+    );
+    if (!searchRes.ok) { log(`Crunchbase HTTP ${searchRes.status}`, 'lw'); return; }
+    const searchData = await searchRes.json();
+    const entity = searchData?.entities?.[0]?.properties;
+    if (entity) {
+      prospect._crunch = {
+        funding:        entity.funding_total?.value_usd ? `$${(entity.funding_total.value_usd/1e6).toFixed(1)}M` : null,
+        lastFundType:   entity.last_funding_type || null,
+        lastFundDate:   entity.last_funding_at || null,
+        fundingRounds:  entity.num_funding_rounds || null,
+        employees:      entity.num_employees_enum || null,
+        ipoStatus:      entity.ipo_status || null,
+        acquired:       entity.acquired_by?.value || null,
+      };
+      const fundStr = entity.funding_total?.value_usd ? `$${(entity.funding_total.value_usd/1e6).toFixed(1)}M raised` : 'funding data found';
+      log(`&#10003; Crunchbase: <span class="ls">${prospect.company}</span> — ${fundStr}`, 'ls');
+      // Add real M&A signal if acquired
+      if (entity.acquired_by?.value && !prospect.signals.includes('M&A Activity')) {
+        prospect.signals.push('M&A Activity');
+        prospect.buyingTrigger = `Acquired by ${entity.acquired_by.value} — post-acquisition integration creates immediate data unification need.`;
+      }
+    } else {
+      log(`Crunchbase: no match for ${prospect.company}`, 'lw');
+    }
+  } catch(e) {
+    log(`Crunchbase error: ${e.message}`, 'le');
+  }
+}
+
+// ── SEC EDGAR ENRICHMENT ──────────────────────────────────────────────────
+// SEC EDGAR full-text search API: https://efts.sec.gov/LATEST/search-index?q="company"&dateRange=custom&startdt=YYYY-MM-DD&forms=8-K
+// 8-K filings = material events: acquisitions, leadership changes, HQ moves
+async function enrichEdgar(prospect) {
+  if (!KEY.edgar) return;
+  try {
+    log(`&#128313; SEC EDGAR: checking filings for <span class="lk">${prospect.company}</span>...`, 'lv');
+    const since = new Date(); since.setMonth(since.getMonth() - 6);
+    const sinceStr = since.toISOString().split('T')[0];
+    const query = encodeURIComponent(`"${prospect.company}"`);
+    // Always route through proxy — SEC EDGAR blocks direct browser requests
+    if (!KEY.proxy) { log(`SEC EDGAR skipped — proxy URL required`, 'lw'); return; }
+    const url = `${KEY.proxy}/edgar/search?q=${query}&dateRange=custom&startdt=${sinceStr}&forms=8-K&email=${encodeURIComponent(KEY.edgar)}`;
+    const res = await fetch(url, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) { log(`SEC EDGAR HTTP ${res.status}`, 'lw'); return; }
+    const data = await res.json();
+    const hits = data?.hits?.hits || [];
+    if (hits.length > 0) {
+      const filings = hits.slice(0,3).map(h => ({
+        date: h._source?.file_date || '',
+        form: h._source?.form_type || '8-K',
+        entity: h._source?.display_names?.[0] || prospect.company
+      }));
+      prospect._edgar = { filings, count: hits.total?.value || hits.length };
+      // Add real HQ Relocation or M&A signal based on filing activity
+      if (!prospect.signals.includes('M&A Activity')) prospect.signals.push('M&A Activity');
+      log(`&#10003; SEC EDGAR: <span class="ls">${prospect.company}</span> — ${filings.length} recent 8-K filing(s) found`, 'ls');
+    } else {
+      log(`SEC EDGAR: no recent 8-K filings for ${prospect.company}`, 'lw');
+      prospect._edgar = { filings: [], count: 0 };
+    }
+  } catch(e) {
+    log(`SEC EDGAR error: ${e.message}`, 'le');
+  }
+}
+
+// ── RENDER RESULTS ────────────────────────────────────────────────────────
+function renderResults() {
+  const el = document.getElementById('results-grid');
+  if (!prospects.length) { el.innerHTML='<div class="empty">No results yet.</div>'; return; }
+  el.innerHTML = prospects.map(p => {
+    const ic = p.intentScore==='HIGH'?'high':p.intentScore==='MEDIUM'?'medium':'low';
+    const tags = (p.signals||[]).map(s => {
+      const isReal = p._edgar?.filings?.length && s==='M&A Activity';
+      return `<span class="pc-tag${isReal?' real':''}">${s}${isReal?' ✓':''}</span>`;
+    }).join('');
+    const sources = (p.sources||[]).map(s=>`<span class="pc-source">${s}</span>`).join('');
+
+    // Contact rows — show verified badge if Apollo enriched
+    const emailRow = p.email ? `<div class="pc-cr ${p._apollo?.verified?'verified':'ai-gen'}">
+      ✉ ${p.email} <span class="${p._apollo?.verified?'verified-badge':'ai-badge'}">${p._apollo?.verified?'✓ verified':'AI'}</span></div>` : '';
+    const phoneRow = p._apollo?.phone ? `<div class="pc-cr verified">☎ ${p._apollo.phone} <span class="verified-badge">✓ Apollo</span></div>` :
+                     p.phone ? `<div class="pc-cr ai-gen">☎ ${p.phone} <span class="ai-badge">AI</span></div>` : '';
+    const liRow = p.linkedin ? `<div class="pc-cr ${p._apollo?.verified?'verified':'ai-gen'}">🔗 ${p.linkedin}</div>` : '';
+
+    // Enrichment strip
+    const enrTags = [
+      p._apollo?.verified ? `<span class="enr-tag enr-apollo">&#128308; Apollo verified</span>` : '',
+      p._crunch?.funding  ? `<span class="enr-tag enr-crunch">&#128312; ${p._crunch.funding} raised</span>` : '',
+      p._edgar?.filings?.length ? `<span class="enr-tag enr-edgar">&#128313; ${p._edgar.count} SEC filing(s)</span>` : '',
+    ].filter(Boolean).join('');
+
+    return `<div class="pcard ${ic}">
+      <div class="pc-head">
+        <div><div class="pc-name">${p.name}</div><div class="pc-role">${p.title} · ${p.company}</div></div>
+        <span class="intent-badge badge-${p.intentScore}">${p.intentScore}</span>
+      </div>
+      <div class="pc-contact">${emailRow}${phoneRow}${liRow}</div>
+      <div class="pc-tags">${tags}</div>
+      ${p.aiChallenge?`<div><div class="pc-sl">AI Challenge</div><div class="pc-st">${p.aiChallenge}</div></div>`:''}
+      ${p.buyingTrigger?`<div><div class="pc-sl">Buying Trigger</div><div class="pc-st">${p.buyingTrigger}</div></div>`:''}
+      ${p.bio?`<div><div class="pc-st" style="color:#8b949e;font-style:italic">${p.bio}</div></div>`:''}
+      ${sources?`<div class="pc-sources">${sources}</div>`:''}
+      ${enrTags?`<div class="enrichment-strip">${enrTags}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── MAIN AGENT RUN ────────────────────────────────────────────────────────
+async function runAgents() {
+  if (!KEY.anthropic) { document.getElementById('welcome-overlay').style.display='flex'; return; }
+  const industry  = document.getElementById('cfg-industry').value;
+  const size      = document.getElementById('cfg-size').value;
+  const geo       = document.getElementById('cfg-geo').value;
+  const titles    = document.getElementById('cfg-titles').value;
+  const keywords  = document.getElementById('cfg-keywords').value;
+  const signals   = [...document.querySelectorAll('.sig-btn.on')].map(b=>b.dataset.sig).join(', ');
+  if (!signals) { alert('Select at least one signal.'); return; }
+
+  const btn = document.getElementById('launch-btn');
+  btn.disabled = true; btn.textContent = 'Running...';
+  document.getElementById('log').innerHTML = '';
+  prospects = []; updateMetrics(); renderResults();
+
+  log(`Agent started — <span class="lk">${industry} | ${geo}</span>`, 'lk');
+  await sleep(300);
+  log(`Signals: <span class="lk">${signals}</span>`);
+  await sleep(250);
+  log(`Keywords: ${keywords}`);
+  await sleep(200);
+  log(`Calling Claude API — generating profiles...`, 'lw');
+
+  const prompt = `You are a B2B sales intelligence agent with access to current knowledge about companies and business news. Return ONLY a raw JSON array — no markdown, no backticks, no explanation.
+
+Generate 6 detailed B2B prospect contacts for:
+- Industry: ${industry}
+- Company Size: ${size}
+- Geography: ${geo}
+- Target Titles: ${titles}
+- Keywords: ${keywords}
+- Buying Intent Signals: ${signals}
+
+Use real, well-known companies relevant to the industry and geography. Draw on your knowledge of actual companies, real executives, recent news, LinkedIn activity, earnings calls, press releases, and industry events to make the profiles as accurate and current as possible.
+For Financial Services + Northeast US, consider: BNY Mellon, Citizens Bank, Fidelity, State Street, JPMorgan Chase, Capital One, PNC, TD Bank, Voya, MetLife, BlackRock, Prudential, Morgan Stanley, Goldman Sachs.
+Base the aiChallenge and buyingTrigger on real publicly known initiatives, recent news, or strategic priorities for each company — not generic placeholders.
+
+Each object must have: name, title, company, companyTier, companySize, industry, email (firstname.lastname@company.com), phone (+1-XXX-555-XXXX), linkedin (linkedin.com/in/handle), intentScore ("HIGH"|"MEDIUM"|"LOW"), signals (2-3 from the list), aiChallenge (1-2 sentences), buyingTrigger (1 sentence), bio (1-2 sentences), sources (2-3 strings).
+
+Return ONLY the JSON array.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': KEY.anthropic,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error?.message||`HTTP ${res.status}`); }
+    const data = await res.json();
+    // Handle tool_use blocks from web search — extract only text content
+    const raw = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const cleaned = raw.replace(/```json|```/g,'').trim();
+    const match = cleaned.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('No JSON array found');
+    prospects = JSON.parse(match[0]);
+    if (!Array.isArray(prospects)||!prospects.length) throw new Error('Empty result');
+
+    log(`Claude generated ${prospects.length} prospects`, 'ls');
+    for (const p of prospects) {
+      await sleep(60);
+      const sc = p.intentScore==='HIGH'?'ls':p.intentScore==='MEDIUM'?'lw':'li';
+      log(`Found: <span class="lk">${p.name}</span> — ${p.title} at ${p.company} [<span class="${sc}">${p.intentScore}</span>]`, 'ls');
+    }
+
+    // ── ENRICHMENT PASS ──────────────────────────────────────────────────
+    const hasEnrichment = KEY.apollo || KEY.crunch || KEY.edgar;
+    if (hasEnrichment) {
+      await sleep(300);
+      log(`Starting enrichment pass...`, 'lv');
+      const ep = document.getElementById('enrich-progress');
+      const pb = document.getElementById('progress-bar');
+      const el = document.getElementById('enrich-label');
+      const pct = document.getElementById('enrich-pct');
+      ep.classList.add('show');
+      const total = prospects.length * [KEY.apollo,KEY.crunch,KEY.edgar].filter(Boolean).length;
+      let done = 0;
+      const tick = () => { done++; const p=Math.round(done/total*100); pb.style.width=p+'%'; pct.textContent=p+'%'; };
+
+      for (let i=0; i<prospects.length; i++) {
+        const p = prospects[i];
+        el.textContent = `Enriching ${p.name} (${i+1}/${prospects.length})...`;
+        if (KEY.apollo)  { await enrichApollo(p);    tick(); }
+        if (KEY.crunch)  { await enrichCrunchbase(p); tick(); }
+        if (KEY.edgar)   { await enrichEdgar(p);      tick(); }
+        renderResults(); updateMetrics();
+        await sleep(200);
+      }
+      ep.classList.remove('show');
+      log(`Enrichment complete.`, 'lv');
+    }
+
+    renderResults(); updateMetrics();
+    log(`All done. <span class="ls">${prospects.filter(p=>p.intentScore==='HIGH').length} high-priority</span> leads ready.`, 'lk');
+
+  } catch(e) {
+    log(`Error: ${e.message}`, 'le');
+  }
+
+  btn.disabled=false; btn.textContent='✦ Launch Intelligence Agent';
+}
+
+function clearAll() {
+  prospects=[]; updateMetrics(); renderResults();
+  document.getElementById('log').innerHTML='<div><span class="lt">[--:--:-- --]</span> <span class="li">Cleared. Ready.</span></div>';
+}
+
+function exportCSV() {
+  if (!prospects.length) { alert('Nothing to export.'); return; }
+  const h=['Name','Title','Company','Size','Industry','Email','Email Source','Phone','Phone Source','LinkedIn','Intent','Signals','AI Challenge','Buying Trigger','Funding','SEC Filings','Sources'];
+  const rows = prospects.map(p=>[
+    p.name,p.title,p.company,p.companySize,p.industry,
+    p.email, p._apollo?.verified?'Apollo':'AI-generated',
+    p._apollo?.phone||p.phone||'', p._apollo?.phone?'Apollo':'AI-generated',
+    p.linkedin,p.intentScore,
+    (p.signals||[]).join('; '),
+    p.aiChallenge,p.buyingTrigger,
+    p._crunch?.funding||'',
+    p._edgar?.count||0,
+    (p.sources||[]).join('; ')
+  ].map(v=>`"${(String(v||'')).replace(/"/g,'""')}"`));
+  const csv=[h.join(','),...rows.map(r=>r.join(','))].join('\n');
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:'apex-enriched.csv'});
+  a.click();
+  log(`Exported ${prospects.length} enriched prospects.`,'ls');
+}
+</script>
+<script>
+
+// ── SALESFORCE INTEGRATION ─────────────────────────────────────────────────
+
+// Embed the KRYSTL_SF module
+// ═══════════════════════════════════════════════════════════════════════════
+// KRYSTL — Salesforce Integration Module
+// Handles OAuth 2.0 + Salesforce REST API for Lead/Contact creation
+// Works with both Developer Orgs and Sandboxes
+// ═══════════════════════════════════════════════════════════════════════════
+
+const KRYSTL_SF = (function () {
+
+  // ── State ────────────────────────────────────────────────────────────────
+  let SF = {
+    instanceUrl:    '',   // e.g. https://yourorg.sandbox.my.salesforce.com
+    accessToken:    '',
+    refreshToken:   '',
+    tokenExpiry:    0,
+    clientId:       '',   // Consumer Key from your ECA / Connected App
+    clientSecret:   '',   // Consumer Secret
+    isSandbox:      true, // true = test.salesforce.com, false = login.salesforce.com
+    redirectUri:    '',   // Must match exactly what's registered in Salesforce
+  };
+
+  // ── OAuth endpoints ───────────────────────────────────────────────────────
+  const AUTH_BASE = () => SF.isSandbox
+    ? 'https://test.salesforce.com'
+    : 'https://login.salesforce.com';
+
+  const AUTH_URL    = () => `${AUTH_BASE()}/services/oauth2/authorize`;
+  const TOKEN_URL   = () => `${AUTH_BASE()}/services/oauth2/token`;
+  const REVOKE_URL  = () => `${AUTH_BASE()}/services/oauth2/revoke`;
+
+  // ── PKCE helpers — synchronous using crypto.getRandomValues + SHA-256 ─────
+  function _generateCodeVerifier () {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return btoa(String.fromCharCode.apply(null, array))
+      .replace(/[+]/g,'-').replace(/[/]/g,'_').replace(/=/g,'');
+  }
+
+  // Synchronous SHA-256 using a simple JS implementation
+  function _sha256sync(str) {
+    // We store the verifier and send it plain (S256 method requires hash)
+    // Use SubtleCrypto but kick off buildAuthUrl as a proper async chain
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  }
+
+  // ── Step 1: Build authorisation URL with PKCE ─────────────────────────────
+  // Returns a Promise<string>
+  function buildAuthUrl () {
+    if (!SF.clientId || !SF.redirectUri) {
+      throw new Error('clientId and redirectUri must be set before authorising');
+    }
+    const verifier = _generateCodeVerifier();
+    sessionStorage.setItem('sf_pkce_verifier', verifier);
+    return _sha256sync(verifier).then(function(digest) {
+      const challenge = btoa(String.fromCharCode.apply(null, new Uint8Array(digest)))
+        .replace(/[+]/g,'-').replace(/[/]/g,'_').replace(/=/g,'');
+      const params = new URLSearchParams({
+        response_type:         'code',
+        client_id:             SF.clientId,
+        redirect_uri:          SF.redirectUri,
+        scope:                 'api refresh_token offline_access',
+        state:                 crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+        code_challenge:        challenge,
+        code_challenge_method: 'S256',
+      });
+      return AUTH_URL() + '?' + params.toString();
+    });
+  }
+
+  // ── Step 2: Exchange authorisation code for tokens (with PKCE verifier) ───
+  async function exchangeCode (code) {
+    const verifier = sessionStorage.getItem('sf_pkce_verifier') || '';
+    const body = new URLSearchParams({
+      grant_type:     'authorization_code',
+      code,
+      client_id:      SF.clientId,
+      redirect_uri:   SF.redirectUri,
+      code_verifier:  verifier,
+    });
+    // Only include client_secret if we have one (not required with PKCE)
+    if (SF.clientSecret) body.set('client_secret', SF.clientSecret);
+    const res  = await fetch(TOKEN_URL(), { method: 'POST', body });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.error || 'Token exchange failed');
+    sessionStorage.removeItem('sf_pkce_verifier');
+    _storeTokens(data);
+    return data;
+  }
+
+  // ── Step 3: Refresh access token when expired ────────────────────────────
+  async function refreshAccessToken () {
+    if (!SF.refreshToken) throw new Error('No refresh token — user must re-authenticate');
+    const body = new URLSearchParams({
+      grant_type:    'refresh_token',
+      refresh_token: SF.refreshToken,
+      client_id:     SF.clientId,
+      client_secret: SF.clientSecret,
+    });
+    const res  = await fetch(TOKEN_URL(), { method: 'POST', body });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || 'Refresh failed');
+    _storeTokens(data);
+    return data;
+  }
+
+  function _storeTokens (data) {
+    SF.accessToken  = data.access_token;
+    SF.instanceUrl  = data.instance_url;
+    SF.tokenExpiry  = Date.now() + (data.expires_in ? data.expires_in * 1000 : 7200000);
+    if (data.refresh_token) SF.refreshToken = data.refresh_token;
+  }
+
+  async function _getToken () {
+    // Auto-refresh if within 60 seconds of expiry
+    if (SF.tokenExpiry && Date.now() > SF.tokenExpiry - 60000) {
+      await refreshAccessToken();
+    }
+    if (!SF.accessToken) throw new Error('Not authenticated — call authorise() first');
+    return SF.accessToken;
+  }
+
+  // ── Core REST API call ────────────────────────────────────────────────────
+  async function _sfRequest (method, path, body = null) {
+    const token = await _getToken();
+    const url   = `${SF.instanceUrl}/services/data/v60.0${path}`;
+    const opts  = {
+      method,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type':  'application/json',
+        'Accept':        'application/json',
+      },
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res  = await fetch(url, opts);
+    if (res.status === 204) return { success: true };
+    const data = await res.json();
+    if (!res.ok) {
+      const msg = Array.isArray(data) ? data[0]?.message : data.message;
+      throw new Error(msg || `Salesforce error ${res.status}`);
+    }
+    return data;
+  }
+
+  // ── Map KRYSTL prospect → Salesforce Lead fields ─────────────────────────
+  function _prospectToLead (prospect) {
+    const nameParts = (prospect.name || '').trim().split(' ');
+    const lastName  = nameParts.slice(1).join(' ') || nameParts[0] || 'Unknown';
+    const firstName = nameParts.length > 1 ? nameParts[0] : '';
+
+    return {
+      // Required
+      LastName:    lastName,
+      Company:     prospect.company    || 'Unknown',
+
+      // Contact
+      FirstName:   firstName,
+      Title:       prospect.title      || '',
+      Email:       prospect.email      || '',
+      Phone:       prospect.phone      || '',
+
+      // Company info
+      Industry:    _mapIndustry(prospect.industry),
+      NumberOfEmployees: _mapEmployees(prospect.companySize),
+
+      // Lead source
+      LeadSource:  'KRYSTL AI',
+
+      // KRYSTL intelligence — stored in Description for demo
+      // In production you'd map to custom fields
+      Description: _buildDescription(prospect),
+
+      // Status
+      Status: prospect.intentScore === 'HIGH'   ? 'Working'
+             : prospect.intentScore === 'MEDIUM' ? 'Open - Not Contacted'
+             : 'Open - Not Contacted',
+
+      // Rating
+      Rating: prospect.intentScore === 'HIGH'   ? 'Hot'
+             : prospect.intentScore === 'MEDIUM' ? 'Warm'
+             : 'Cold',
+    };
+  }
+
+  function _buildDescription (p) {
+    const lines = [
+      `KRYSTL AI Intelligence — Intent Score: ${p.intentScore || 'UNKNOWN'}`,
+      '',
+      p.aiChallenge   ? `AI CHALLENGE: ${p.aiChallenge}`   : '',
+      p.buyingTrigger ? `BUYING TRIGGER: ${p.buyingTrigger}` : '',
+      p.bio           ? `BIO: ${p.bio}` : '',
+      '',
+      p.signals?.length ? `SIGNALS: ${p.signals.join(', ')}` : '',
+      p.linkedin      ? `LINKEDIN: ${p.linkedin}` : '',
+      p._apollo?.verified ? 'CONTACT: Verified by Apollo.io' : '',
+      p._edgar?.count ? `SEC FILINGS: ${p._edgar.count} recent 8-K filing(s)` : '',
+      p._crunch?.funding  ? `FUNDING: ${p._crunch.funding} raised` : '',
+      '',
+      `Sources: ${(p.sources || []).join(', ')}`,
+      `Generated by KRYSTL — signalarity.ai`,
+    ].filter(Boolean);
+    return lines.join('\n');
+  }
+
+  function _mapIndustry (industry = '') {
+    const map = {
+      'financial services': 'Finance',
+      'healthcare':         'Healthcare',
+      'technology':         'Technology',
+      'manufacturing':      'Manufacturing',
+      'insurance':          'Insurance',
+      'retail':             'Retail',
+    };
+    return map[industry.toLowerCase()] || 'Other';
+  }
+
+  function _mapEmployees (sizeStr = '') {
+    if (/1000\+|enterprise/i.test(sizeStr))   return 5000;
+    if (/200.999|mid.market/i.test(sizeStr))  return 500;
+    if (/10.199|smb/i.test(sizeStr))          return 100;
+    const num = parseInt(sizeStr.replace(/[^0-9]/g, ''));
+    return isNaN(num) ? null : num;
+  }
+
+  // ── PUBLIC API ────────────────────────────────────────────────────────────
+
+  /** Configure the integration with your Salesforce credentials */
+  function configure (config) {
+    SF = { ...SF, ...config };
+  }
+
+  /** Returns the Salesforce login URL to redirect the user to (returns Promise<string>) */
+  function getAuthUrl () {
+    return buildAuthUrl();
+  }
+
+  /** Call this with the ?code= param from Salesforce's OAuth redirect */
+  async function handleCallback (code) {
+    return exchangeCode(code);
+  }
+
+  /** Check if currently authenticated */
+  function isAuthenticated () {
+    return !!SF.accessToken && !!SF.instanceUrl;
+  }
+
+  /** Disconnect — revoke tokens */
+  async function disconnect () {
+    if (SF.accessToken) {
+      try {
+        await fetch(`${REVOKE_URL()}?token=${SF.accessToken}`);
+      } catch (e) { /* ignore revoke errors */ }
+    }
+    SF.accessToken = SF.refreshToken = SF.instanceUrl = '';
+    SF.tokenExpiry = 0;
+  }
+
+  /** Create a single Lead in Salesforce from a KRYSTL prospect */
+  async function createLead (prospect) {
+    const leadData = _prospectToLead(prospect);
+    const result   = await _sfRequest('POST', '/sobjects/Lead', leadData);
+    return { id: result.id, success: result.success, prospect, leadData };
+  }
+
+  /** Push all prospects to Salesforce as Leads */
+  async function pushAllProspects (prospects, onProgress) {
+    const results = [];
+    for (let i = 0; i < prospects.length; i++) {
+      const p = prospects[i];
+      try {
+        const r = await createLead(p);
+        results.push({ ...r, status: 'created' });
+        if (onProgress) onProgress(i + 1, prospects.length, p.name, 'success');
+      } catch (e) {
+        results.push({ prospect: p, status: 'error', error: e.message });
+        if (onProgress) onProgress(i + 1, prospects.length, p.name, 'error', e.message);
+      }
+      // Small delay to avoid rate limits
+      await new Promise(r => setTimeout(r, 200));
+    }
+    return results;
+  }
+
+  /** Query existing Leads to avoid duplicates */
+  async function checkDuplicates (emails) {
+    const emailList = emails.filter(Boolean).map(e => `'${e}'`).join(',');
+    if (!emailList) return [];
+    const soql   = `SELECT Id, Email, Name FROM Lead WHERE Email IN (${emailList}) LIMIT 200`;
+    const result = await _sfRequest('GET', `/query?q=${encodeURIComponent(soql)}`);
+    return result.records || [];
+  }
+
+  /** Get org info — confirms connection is working */
+  async function getOrgInfo () {
+    return _sfRequest('GET', '/sobjects/Organization/describe');
+  }
+
+  /** List recent Leads created by KRYSTL */
+  async function getKrystlLeads (limit = 50) {
+    const soql = `SELECT Id, FirstName, LastName, Company, Email, Status, Rating, CreatedDate
+                  FROM Lead WHERE LeadSource = 'KRYSTL AI'
+                  ORDER BY CreatedDate DESC LIMIT ${limit}`;
+    const result = await _sfRequest('GET', `/query?q=${encodeURIComponent(soql)}`);
+    return result.records || [];
+  }
+
+  return {
+    configure,
+    getAuthUrl,
+    handleCallback,
+    isAuthenticated,
+    disconnect,
+    createLead,
+    pushAllProspects,
+    checkDuplicates,
+    getOrgInfo,
+    getKrystlLeads,
+    // expose SF state for debugging
+    getState: () => ({ ...SF, accessToken: SF.accessToken ? '***' : '', clientSecret: '***' }),
+  };
+
+})();
+
+
+
+// SF UI helpers
+function sfUpdateUI () {
+  const connected = KRYSTL_SF.isAuthenticated();
+  const bar   = document.getElementById('sf-bar');
+  const pill  = document.getElementById('sf-pill');
+  const status= document.getElementById('sf-status');
+  const pushBtn= document.getElementById('sf-push-btn');
+  if (bar) bar.classList.toggle('show', connected);
+  if (pill) pill.className = 'api-pill ' + (connected ? 'active' : 'inactive');
+  if (status) { status.textContent = connected ? '✓ Connected' : 'Not connected'; status.className = 'sf-status' + (connected ? ' connected' : ''); }
+  if (pushBtn) pushBtn.style.display = connected && prospects.length ? 'inline-block' : 'none';
+}
+
+function sfShowCallbackUrl () {
+  const override = document.getElementById('sf-callback-override')?.value.trim();
+  const auto = window.location.origin + window.location.pathname;
+  const url = override || auto;
+  const el = document.getElementById('sf-callback-display');
+  if (el) el.value = url;
+}
+
+function copySfCallback () {
+  const el = document.getElementById('sf-callback-display');
+  if (!el) return;
+  el.select();
+  document.execCommand('copy');
+  const btn = el.nextElementSibling;
+  const orig = btn.textContent;
+  btn.textContent = '✓ Copied';
+  btn.style.color = '#3fb950';
+  setTimeout(() => { btn.textContent = orig; btn.style.color = '#00a1e0'; }, 2000);
+}
+
+function sfConnect () {
+  const key    = document.getElementById('s-sf-key')?.value.trim();
+  const secret = document.getElementById('s-sf-secret')?.value.trim();
+  const env    = document.getElementById('s-sf-env')?.value;
+  if (!key || !secret) { alert('Enter your Consumer Key and Consumer Secret first.'); return; }
+
+  const overrideUrl = document.getElementById('sf-callback-override')?.value.trim();
+  const redirectUri = overrideUrl || (window.location.origin + window.location.pathname);
+  KRYSTL_SF.configure({
+    clientId:    key,
+    clientSecret:secret,
+    isSandbox:   env !== 'production',
+    redirectUri
+  });
+
+  const statusEl = document.getElementById('sf-connect-status');
+  if (statusEl) statusEl.textContent = 'Redirecting to Salesforce login...';
+
+  // Store credentials temporarily so we can restore after OAuth redirect
+  sessionStorage.setItem('sf_client_id',     key);
+  sessionStorage.setItem('sf_client_secret', secret);
+  sessionStorage.setItem('sf_is_sandbox',    env !== 'production' ? '1' : '0');
+  sessionStorage.setItem('sf_redirect_uri', redirectUri);
+
+  window.location.href = KRYSTL_SF.getAuthUrl();
+}
+
+async function sfDisconnect () {
+  await KRYSTL_SF.disconnect();
+  sessionStorage.removeItem('sf_client_id');
+  sessionStorage.removeItem('sf_client_secret');
+  sfUpdateUI();
+  log('Salesforce disconnected.', 'lw');
+  document.getElementById('sf-settings-panel')?.classList.remove('open');
+}
+
+async function sfPushAll () {
+  if (!prospects.length) { alert('No prospects to push.'); return; }
+  const btn = document.getElementById('sf-push-btn');
+  const cntEl = document.getElementById('sf-push-count');
+  btn.disabled = true;
+  btn.textContent = 'Pushing...';
+
+  // Check for duplicates first
+  const emails = prospects.map(p => p.email).filter(Boolean);
+  let dupes = [];
+  try { dupes = await KRYSTL_SF.checkDuplicates(emails); } catch(e) {}
+  const dupeEmails = new Set(dupes.map(d => d.Email));
+
+  const toCreate = prospects.filter(p => !dupeEmails.has(p.email));
+  const skipped  = prospects.length - toCreate.length;
+  if (skipped) log(`Skipping ${skipped} duplicate(s) already in Salesforce.`, 'lw');
+  if (!toCreate.length) { btn.disabled=false; btn.textContent='&#8648; Push to Salesforce'; cntEl.textContent='All already in SF'; return; }
+
+  const results = await KRYSTL_SF.pushAllProspects(toCreate, (done, total, name, status, err) => {
+    const msg = status === 'success'
+      ? `&#10003; SF Lead created: <span class="lk">${name}</span>`
+      : `&#10005; SF error for ${name}: ${err}`;
+    log(msg, status === 'success' ? 'ls' : 'le');
+    cntEl.textContent = `${done}/${total} pushed`;
+  });
+
+  const ok  = results.filter(r => r.status === 'created').length;
+  const err = results.filter(r => r.status === 'error').length;
+  log(`Salesforce push complete: ${ok} created, ${err} errors, ${skipped} skipped.`, 'lk');
+  btn.disabled = false;
+  btn.textContent = '&#8648; Push to Salesforce';
+  cntEl.textContent = `${ok} in Salesforce`;
+}
+
+// Handle OAuth callback — check for ?code= in URL on page load
+// Restore session after SF OAuth redirect
+(function restoreAfterSFRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.get('code')) return;
+  const storedKey = sessionStorage.getItem('sf_anthropic_key');
+  if (!storedKey) return;
+  // Restore Anthropic key and hide welcome overlay
+  KEY.anthropic = storedKey;
+  const overlay = document.getElementById('welcome-overlay');
+  if (overlay) overlay.style.display = 'none';
+  const input = document.getElementById('k-anthropic');
+  if (input) input.value = storedKey;
+  updatePills();
+})();
+
+(async function handleSFCallback () {
+  const params = new URLSearchParams(window.location.search);
+  const code   = params.get('code');
+  const state  = params.get('state');
+  if (!code) return;
+
+  // Restore credentials from session storage
+  const clientId     = sessionStorage.getItem('sf_client_id');
+  const clientSecret = sessionStorage.getItem('sf_client_secret');
+  const isSandbox    = sessionStorage.getItem('sf_is_sandbox') !== '0';
+  if (!clientId || !clientSecret) { console.warn('SF: no stored credentials for callback'); return; }
+
+  const overrideUrl = document.getElementById('sf-callback-override')?.value.trim();
+  const redirectUri = overrideUrl || (window.location.origin + window.location.pathname);
+  KRYSTL_SF.configure({ clientId, clientSecret, isSandbox, redirectUri });
+
+  try {
+    await KRYSTL_SF.handleCallback(code);
+    log('&#9749; Salesforce connected successfully!', 'ls');
+    sfUpdateUI();
+    // Clean URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } catch (e) {
+    log('Salesforce auth error: ' + e.message, 'le');
+  }
+})();
+
+// Show callback URL in settings whenever panel opens
+const _origToggleSettings = window.toggleSettings;
+window.toggleSettings = function () {
+  _origToggleSettings();
+  sfShowCallbackUrl();
+};
+
+// Update SF push button visibility whenever results change
+const _origRenderResults = window.renderResults;
+window.renderResults = function () {
+  _origRenderResults();
+  sfUpdateUI();
+};
+
+</script>
+</body>
+</html>
