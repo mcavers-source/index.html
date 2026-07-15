@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Signalarity — KRYSTL AI Sales Intelligence</title>
+<meta name="description" content="KRYSTL by Signalarity. Find the right buyers, understand their pain, reach them first. AI-powered sales intelligence that turns research into revenue."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/png" href="icon-192.png"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="manifest" href="manifest.json"/>
+<style>
+:root {
+  --bg:      #050810;
+  --bg2:     #090d18;
+  --bg3:     #0e1525;
+  --border:  #1a2540;
+  --border2: #243050;
+  --blue:    #1f6feb;
+  --blue2:   #388bfd;
+  --blue3:   #58a6ff;
+  --blue4:   #93c5fd;
+  --gem1:    #1d4ed8;
+  --gem2:    #3b82f6;
+  --gem3:    #60a5fa;
+  --green:   #3fb950;
+  --amber:   #d29922;
+  --purple:  #a78bfa;
+  --red:     #f85149;
+  --text:    #e6edf3;
+  --text2:   #94a3b8;
+  --text3:   #4b5e7a;
+  --ff:      'Inter', system-ui, sans-serif;
+  --mono:    'JetBrains Mono', monospace;
+  --radius:  12px;
+  --radius2: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--ff);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+a { color: var(--blue3); text-decoration: none; }
+a:hover { color: var(--blue4); }
+
+/* ── NOISE TEXTURE ─────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.022;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ───────────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5%; height: 64px;
+  background: rgba(5,8,16,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-gem { width: 28px; height: 28px; flex-shrink: 0; }
+.nav-wordmark { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; }
+.nav-wordmark span { color: var(--blue3); }
+.nav-sub { font-size: 9px; color: var(--text3); letter-spacing: 0.14em; text-transform: uppercase; margin-top: 1px; }
+.nav-links { display: flex; gap: 28px; font-size: 13px; color: var(--text2); }
+.nav-links a { transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--text2); padding: 7px 16px; border-radius: 6px; font-size: 13px; font-family: var(--ff); cursor: pointer; transition: all 0.2s; }
+.btn-ghost:hover { border-color: var(--blue3); color: var(--text); }
+.btn-primary { background: var(--blue); color: #fff; border: none; padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: var(--ff); cursor: pointer; transition: background 0.2s; }
+.btn-primary:hover { background: var(--blue2); }
+
+/* ── HERO ──────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 120px 5% 80px;
+  position: relative; overflow: hidden;
+  text-align: center;
+}
+.hero-glow {
+  position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse, rgba(31,111,235,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-banner-wrap {
+  width: 100%; max-width: 1100px; margin: 0 auto 60px;
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+}
+.hero-banner-wrap img { width: 100%; display: block; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(31,111,235,0.1); border: 1px solid rgba(31,111,235,0.3);
+  color: var(--blue3); font-size: 12px; font-weight: 500; letter-spacing: 0.06em;
+  padding: 5px 14px; border-radius: 20px; margin-bottom: 28px;
+}
+.hero-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+.hero-title {
+  font-size: clamp(40px, 6vw, 80px);
+  font-weight: 900; letter-spacing: -3px; line-height: 1.05;
+  margin-bottom: 24px;
+}
+.hero-title .hl { color: var(--blue3); }
+.hero-title .dim { color: var(--text3); }
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px); color: var(--text2);
+  max-width: 620px; margin: 0 auto 40px; line-height: 1.65;
+}
+.hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-lg { padding: 14px 28px; font-size: 15px; font-weight: 600; border-radius: 8px; font-family: var(--ff); cursor: pointer; transition: all 0.2s; }
+.btn-lg-primary { background: var(--blue); color: #fff; border: none; }
+.btn-lg-primary:hover { background: var(--blue2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(31,111,235,0.35); }
+.btn-lg-ghost { background: transparent; border: 1px solid var(--border2); color: var(--text); }
+.btn-lg-ghost:hover { border-color: var(--blue3); }
+
+/* ── STAT STRIP ────────────────────────────────────────────────── */
+.stats-strip {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+.stat { padding: 32px 5%; border-right: 1px solid var(--border); text-align: center; }
+.stat:last-child { border-right: none; }
+.stat-val { font-size: 36px; font-weight: 900; letter-spacing: -1px; color: var(--text); }
+.stat-val span { color: var(--blue3); }
+.stat-label { font-size: 12px; color: var(--text3); margin-top: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* ── SECTIONS ──────────────────────────────────────────────────── */
+.section { padding: 100px 5%; position: relative; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+.section-alt { background: var(--bg2); }
+.eyebrow { font-size: 11px; font-weight: 700; color: var(--blue3); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px; display: block; }
+.section-title { font-size: clamp(28px, 4vw, 48px); font-weight: 900; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 18px; }
+.section-sub { font-size: 17px; color: var(--text2); max-width: 560px; line-height: 1.7; margin-bottom: 56px; }
+
+/* ── KRYSTL PRODUCT SHOWCASE ───────────────────────────────────── */
+.product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--border); border-radius: var(--radius); overflow: hidden; }
+.product-card {
+  background: var(--bg2); padding: 36px 32px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.product-card:hover { background: var(--bg3); }
+.pc-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 4px; }
+.pc-icon-blue   { background: rgba(31,111,235,0.15); }
+.pc-icon-green  { background: rgba(63,185,80,0.12); }
+.pc-icon-purple { background: rgba(167,139,250,0.12); }
+.pc-icon-amber  { background: rgba(210,153,34,0.12); }
+.pc-title { font-size: 18px; font-weight: 700; }
+.pc-body { font-size: 14px; color: var(--text2); line-height: 1.65; }
+.pc-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-top: 4px; }
+.pc-tag-blue   { background: rgba(88,166,255,.1); color: var(--blue3); border: 1px solid rgba(88,166,255,.2); }
+.pc-tag-green  { background: rgba(63,185,80,.1);  color: var(--green); border: 1px solid rgba(63,185,80,.2); }
+.pc-tag-purple { background: rgba(167,139,250,.1);color: var(--purple);border: 1px solid rgba(167,139,250,.2);}
+.pc-tag-amber  { background: rgba(210,153,34,.1); color: var(--amber); border: 1px solid rgba(210,153,34,.2); }
+
+/* ── PLAYBOOK FEATURE ──────────────────────────────────────────── */
+.playbook-showcase {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+}
+.playbook-panel-mock {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+.pb-mock-head {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  background: rgba(10,15,26,0.8); display: flex; align-items: center; justify-content: space-between;
+}
+.pb-mock-title { font-size: 13px; font-weight: 700; color: var(--purple); }
+.pb-mock-sub { font-size: 11px; color: var(--text3); }
+.pb-mock-badge { font-size: 9px; background: rgba(31,111,235,.15); color: var(--blue3); border: 1px solid rgba(31,111,235,.3); padding: 2px 8px; border-radius: 10px; }
+.pb-mock-section { border-bottom: 1px solid var(--border); }
+.pb-mock-section:last-child { border-bottom: none; }
+.pb-mock-sh { padding: 10px 16px; font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,.04); }
+.pb-mock-sb { padding: 12px 16px; font-size: 12px; color: var(--text2); line-height: 1.6; }
+.pb-step-mock { display: flex; gap: 10px; padding: 8px 16px; font-size: 12px; color: var(--text2); border-bottom: 1px solid rgba(255,255,255,.03); }
+.pb-step-mock:last-child { border-bottom: none; }
+.pb-step-n { color: var(--purple); font-weight: 700; font-size: 11px; width: 18px; flex-shrink: 0; }
+
+/* ── HOW IT WORKS ──────────────────────────────────────────────── */
+.steps { display: flex; flex-direction: column; gap: 0; }
+.step {
+  display: grid; grid-template-columns: 72px 1fr; gap: 24px;
+  padding: 32px 0; border-bottom: 1px solid var(--border); align-items: start;
+}
+.step:last-child { border-bottom: none; }
+.step-num {
+  font-family: var(--mono); font-size: 13px; font-weight: 500;
+  color: var(--text3); padding-top: 4px;
+}
+.step-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.step-body { font-size: 15px; color: var(--text2); line-height: 1.65; }
+.step-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.step-tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); }
+
+/* ── INTEGRATIONS ──────────────────────────────────────────────── */
+.integrations-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.integration-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 24px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.integration-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+.integration-card.featured { border-color: rgba(31,111,235,.4); background: rgba(31,111,235,.05); }
+.int-logo { font-size: 28px; margin-bottom: 12px; }
+.int-name { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.int-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.int-status { margin-top: 14px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+.int-status.live   { color: var(--green); }
+.int-status.coming { color: var(--text3); }
+.int-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* ── SIGNAL TYPES ──────────────────────────────────────────────── */
+.signals-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.signal-chip {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius2); padding: 18px 16px;
+  font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
+  transition: all 0.2s;
+}
+.signal-chip:hover { border-color: var(--blue); background: rgba(31,111,235,.06); }
+.signal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── INTELLIGENCE BRIEF MOCK ───────────────────────────────────── */
+.brief-mock {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+  max-width: 520px;
+}
+.brief-mock-head {
+  padding: 14px 18px; display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 1px solid var(--border);
+}
+.brief-name { font-size: 15px; font-weight: 700; }
+.brief-role { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.intent-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; letter-spacing: .5px; }
+.intent-high { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+.brief-contact { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
+.brief-contact-row { font-size: 12px; color: var(--blue3); display: flex; align-items: center; gap: 6px; }
+.brief-tags { padding: 10px 18px; border-bottom: 1px solid var(--border); display: flex; gap: 6px; flex-wrap: wrap; }
+.brief-tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(31,111,235,.1); color: var(--blue3); border: 1px solid rgba(31,111,235,.2); }
+.brief-section { padding: 12px 18px; border-bottom: 1px solid var(--border); }
+.brief-section:last-child { border-bottom: none; }
+.brief-section-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
+.brief-section-text { font-size: 12px; color: var(--text2); line-height: 1.65; }
+.brief-sources { padding: 10px 18px; display: flex; gap: 6px; flex-wrap: wrap; }
+.brief-source { font-size: 10px; padding: 2px 7px; border-radius: 8px; background: rgba(255,255,255,.04); color: var(--text3); border: 1px solid var(--border); }
+
+/* ── TESTIMONIAL / QUOTE ────────────────────────────────────────── */
+.quote-section { text-align: center; }
+.quote-mark { font-size: 80px; color: var(--border2); font-family: Georgia, serif; line-height: 0.5; margin-bottom: 24px; }
+.quote-text { font-size: clamp(20px,3vw,30px); font-weight: 700; letter-spacing: -0.5px; line-height: 1.3; max-width: 800px; margin: 0 auto 24px; }
+.quote-text .hl { color: var(--blue3); }
+
+/* ── WHO IT'S FOR ──────────────────────────────────────────────── */
+.personas-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.persona-card {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px;
+}
+.persona-icon { font-size: 32px; margin-bottom: 14px; }
+.persona-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.persona-role { font-size: 12px; color: var(--blue3); font-weight: 600; margin-bottom: 10px; }
+.persona-body { font-size: 13px; color: var(--text2); line-height: 1.65; }
+.persona-wins { margin-top: 14px; display: flex; flex-direction: column; gap: 5px; }
+.persona-win { font-size: 12px; color: var(--text2); display: flex; align-items: baseline; gap: 6px; }
+.persona-win::before { content: '→'; color: var(--green); font-size: 11px; }
+
+/* ── CTA ───────────────────────────────────────────────────────── */
+.cta-section {
+  background: linear-gradient(135deg, rgba(31,111,235,0.12) 0%, rgba(29,78,216,0.06) 50%, transparent 100%);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  text-align: center; padding: 100px 5%;
+}
+.cta-title { font-size: clamp(32px,5vw,60px); font-weight: 900; letter-spacing: -2px; line-height: 1.1; margin-bottom: 20px; }
+.cta-sub { font-size: 18px; color: var(--text2); max-width: 520px; margin: 0 auto 40px; }
+.cta-note { font-size: 12px; color: var(--text3); margin-top: 14px; }
+
+/* ── FOOTER ────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border); padding: 48px 5%;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg2);
+}
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-wordmark { font-size: 15px; font-weight: 800; letter-spacing: -0.5px; }
+.footer-wordmark span { color: var(--blue3); }
+.footer-copy { font-size: 12px; color: var(--text3); }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-size: 13px; color: var(--text2); }
+.footer-links a:hover { color: var(--text); }
+
+/* ── DIVIDER RULE ──────────────────────────────────────────────── */
+.rule { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+/* ── SCROLL REVEAL ─────────────────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ── PASSWORD GATE ─────────────────────────────────────────────── */
+#gate {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+}
+.gate-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 40px; width: 380px; text-align: center;
+}
+.gate-logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
+.gate-title { font-size: 22px; font-weight: 800; }
+.gate-title span { color: var(--blue3); }
+.gate-sub { font-size: 13px; color: var(--text2); margin-bottom: 28px; margin-top: 4px; }
+.gate-input {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text); font-size: 15px; padding: 12px 14px;
+  border-radius: 8px; outline: none; font-family: var(--mono); text-align: center;
+  letter-spacing: 3px; margin-bottom: 14px;
+}
+.gate-input:focus { border-color: var(--blue); }
+.gate-btn {
+  width: 100%; background: var(--blue); color: #fff; border: none;
+  padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 600;
+  font-family: var(--ff); cursor: pointer;
+}
+.gate-btn:hover { background: var(--blue2); }
+.gate-err { font-size: 12px; color: var(--red); margin-top: 8px; display: none; }
+#app { display: none; }
+
+/* ── RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .stats-strip { grid-template-columns: repeat(2,1fr); }
+  .product-grid { grid-template-columns: 1fr; }
+  .playbook-showcase { grid-template-columns: 1fr; }
+  .integrations-grid { grid-template-columns: 1fr 1fr; }
+  .signals-grid { grid-template-columns: repeat(2,1fr); }
+  .personas-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  footer { flex-direction: column; gap: 20px; text-align: center; }
+}
+@media (max-width: 600px) {
+  .stats-strip { grid-template-columns: 1fr 1fr; }
+  .integrations-grid { grid-template-columns: 1fr; }
+  .signals-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Gate -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">
+      <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
+        <polygon points="50,4 72,28 50,48 28,28" fill="#1d4ed8"/>
+        <polygon points="50,4 28,28 22,52 50,48" fill="#3b82f6"/>
+        <polygon points="50,4 72,28 78,52 50,48" fill="#1e40af"/>
+        <polygon points="28,28 22,52 50,48" fill="#60a5fa"/>
+        <polygon points="22,52 50,96 50,48" fill="#2563eb"/>
+        <polygon points="78,52 50,48 50,96" fill="#1e40af"/>
+        <polygon points="44,48 56,48 50,58" fill="#93c5fd"/>
+      </svg>
+      <div class="gate-title">KRYST<span>L</span></div>
+    </div>
+    <div class="gate-sub">by Signalarity &nbsp;·&nbsp; Private Preview</div>
+    <input class="gate-input" type="password" id="gate-input" placeholder="········" onkeydown="if(event.key==='Enter')checkGate()"/>
+    <button class="gate-btn" onclick="checkGate()">Enter →</button>
+    <div class="gate-err" id="gate-err">Incorrect access code</div>
+  </div>
+</div>
+
+<div id="app">
+
+<!-- Nav -->
+<nav>
+  <a href="#" class="nav-brand" style="text-decoration:none;color:inherit">
+    <svg class="nav-gem" viewBox="0 0 100 100" fill="none">
+      <polygon points="50,4 72,28 50,48 28,28" fill="#1d4ed8"/>
+      <polygon points="50,4 28,28 22,52 50,48" fill="#3b82f6"/>
+      <polygon points="50,4 72,28 78,52 50,48" fill="#1e40af"/>
+      <polygon points="28,28 22,52 50,48" fill="#60a5fa"/>
+      <polygon points="22,52 50,96 50,48" fill="#2563eb"/>
+      <polygon points="78,52 50,48 50,96" fill="#1e40af"/>
+      <polygon points="44,48 56,48 50,58" fill="#93c5fd"/>
+    </svg>
+    <div>
+      <div class="nav-wordmark">KRYST<span>L</span></div>
+      <div class="nav-sub">by signalarity</div>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#product">Product</a>
+    <a href="#playbook">Playbook</a>
+    <a href="#integrations">Integrations</a>
+    <a href="#for-who">Who it's for</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-ghost" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Request Access</button>
+    <a href="APEX-Sales-Intelligence-v2.html"><button class="btn-primary">Launch KRYSTL →</button></a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">● &nbsp;AI Sales Intelligence · Private Preview</div>
+  <h1 class="hero-title">
+    Find the right buyers.<br/>
+    Understand their <span class="hl">pain.</span><br/>
+    Reach them <span class="dim">first.</span>
+  </h1>
+  <p class="hero-sub">KRYSTL turns hours of manual prospect research into a 60-second intelligence brief — with intent scores, buying triggers, AI challenges, and a complete sales playbook. Ready to push to your CRM.</p>
+  <div class="hero-btns">
+    <a href="APEX-Sales-Intelligence-v2.html"><button class="btn-lg btn-lg-primary">Launch KRYSTL →</button></a>
+    <button class="btn-lg btn-lg-ghost" onclick="document.getElementById('product').scrollIntoView({behavior:'smooth'})">See the product ↓</button>
+  </div>
+  <div style="margin-top:60px;width:100%;max-width:1100px">
+    <img src="hero-banner.png" alt="KRYSTL AI Sales Intelligence" style="width:100%;border-radius:16px;box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,.05);display:block"/>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="stats-strip">
+  <div class="stat"><div class="stat-val"><span>&lt;</span>60s</div><div class="stat-label">From ICP to full intelligence brief</div></div>
+  <div class="stat"><div class="stat-val">15<span>+</span></div><div class="stat-label">Data points per prospect profile</div></div>
+  <div class="stat"><div class="stat-val">8</div><div class="stat-label">Configurable buying intent signals</div></div>
+  <div class="stat"><div class="stat-val"><span>∞</span></div><div class="stat-label">Prospects — generate more any time</div></div>
+</div>
+
+<!-- Product Features -->
+<section class="section" id="product">
+  <div class="section-inner">
+    <span class="eyebrow reveal">The product</span>
+    <h2 class="section-title reveal">Everything in one intelligence brief.</h2>
+    <p class="section-sub reveal">KRYSTL isn't a contact list. It's a complete picture of why a prospect will buy, what they're struggling with, and exactly how to reach them.</p>
+    <div class="product-grid reveal">
+      <div class="product-card">
+        <div class="pc-icon pc-icon-blue">🎯</div>
+        <div class="pc-title">Intent Scoring</div>
+        <div class="pc-body">Every prospect is scored HIGH, MEDIUM, or LOW based on active buying signals detected across the web — M&A activity, AI initiatives, cloud migrations, executive changes, and more. Prioritise your pipeline automatically.</div>
+        <span class="pc-tag pc-tag-blue">HIGH / MEDIUM / LOW</span>
+      </div>
+      <div class="product-card">
+        <div class="pc-icon pc-icon-purple">🧠</div>
+        <div class="pc-title">AI Challenge Analysis</div>
+        <div class="pc-body">For every prospect, KRYSTL identifies the specific AI and data challenge their company is facing right now — based on real public intelligence, job postings, earnings calls, and executive statements. Not guesswork. Specifics.</div>
+        <span class="pc-tag pc-tag-purple">Company-specific</span>
+      </div>
+      <div class="product-card">
+        <div class="pc-icon pc-icon-amber">⚡</div>
+        <div class="pc-title">Buying Triggers</div>
+        <div class="pc-body">Real events — SEC 8-K filings, funding announcements, leadership appointments, job posting surges — that signal a company is actively evaluating new solutions. Know who's in-market before they raise their hand.</div>
+        <span class="pc-tag pc-tag-amber">Real-time events</span>
+      </div>
+      <div class="product-card">
+        <div class="pc-icon pc-icon-green">✉️</div>
+        <div class="pc-title">Email Composer</div>
+        <div class="pc-body">One click generates a personalised introductory email using the prospect's specific AI challenge and buying trigger. Peer-to-peer tone, specific references, a single clear ask. Not a cold pitch — an intelligent opening.</div>
+        <span class="pc-tag pc-tag-green">One-click drafting</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Intelligence Brief Mock -->
+<section class="section section-alt">
+  <div class="section-inner">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center">
+      <div>
+        <span class="eyebrow reveal">Sample output</span>
+        <h2 class="section-title reveal">Not a contact list.<br/>An intelligence brief.</h2>
+        <p class="section-sub reveal" style="margin-bottom:32px">Every profile contains verified contact data, real company intelligence, specific buying signals, and an AI-written challenge analysis — all in under 60 seconds.</p>
+        <div class="step-tags reveal">
+          <span class="step-tag" style="color:var(--green);border-color:rgba(63,185,80,.3)">✓ Verified contact</span>
+          <span class="step-tag" style="color:var(--blue3);border-color:rgba(88,166,255,.3)">Real buying trigger</span>
+          <span class="step-tag" style="color:var(--purple);border-color:rgba(167,139,250,.3)">Company-specific AI challenge</span>
+          <span class="step-tag" style="color:var(--amber);border-color:rgba(210,153,34,.3)">Clickable sources</span>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="brief-mock">
+          <div class="brief-mock-head">
+            <div>
+              <div class="brief-name">Leigh-Ann Russell</div>
+              <div class="brief-role">Chief Information Officer · BNY Mellon</div>
+            </div>
+            <span class="intent-badge intent-high">HIGH</span>
+          </div>
+          <div class="brief-contact">
+            <div class="brief-contact-row">✉ leigh-ann.russell@bny.com <span style="font-size:9px;background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);padding:1px 5px;border-radius:4px">✓ verified</span></div>
+            <div class="brief-contact-row">🔗 linkedin.com/in/leighannrussell</div>
+          </div>
+          <div class="brief-tags">
+            <span class="brief-tag">AI Initiative</span>
+            <span class="brief-tag">Data Lake / Warehouse</span>
+            <span class="brief-tag">M&A Activity</span>
+          </div>
+          <div class="brief-section">
+            <div class="brief-section-label">AI Challenge</div>
+            <div class="brief-section-text">BNY Mellon is scaling its Eliza AI platform across 117+ production use cases but governing unstructured data at that volume — research notes, contracts, communications — remains a critical bottleneck for model accuracy and regulatory compliance.</div>
+          </div>
+          <div class="brief-section">
+            <div class="brief-section-label">Buying Trigger</div>
+            <div class="brief-section-text">BNY's 2025 investor materials confirmed over 35% of employees enabled on Eliza with a target of 80%+ by year-end — creating urgent demand for enterprise-grade unstructured data management.</div>
+          </div>
+          <div class="brief-sources">
+            <a href="#" class="brief-source">BNY Annual Report 2025 ↗</a>
+            <a href="#" class="brief-source">CDO Magazine Mar 2025 ↗</a>
+            <a href="#" class="brief-source">SEC Form 8-K ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KRYSTL Playbook -->
+<section class="section" id="playbook">
+  <div class="section-inner">
+    <span class="eyebrow reveal">KRYSTL Playbook</span>
+    <h2 class="section-title reveal">The complete sales playbook.<br/>Generated automatically.</h2>
+    <p class="section-sub reveal">After every prospect is found, KRYSTL silently builds a full sales playbook in the background. When you're ready to act, everything you need is waiting — tailored to your rep's experience level.</p>
+    <div class="playbook-showcase">
+      <div class="reveal">
+        <div class="playbook-panel-mock">
+          <div class="pb-mock-head">
+            <div>
+              <div class="pb-mock-title">📋 KRYSTL Sales Playbook</div>
+              <div class="pb-mock-sub">Leigh-Ann Russell · BNY Mellon</div>
+            </div>
+            <span class="pb-mock-badge">Senior AE Mode</span>
+          </div>
+          <div class="pb-mock-section">
+            <div class="pb-mock-sh" style="color:#f59e0b">🌍 SITUATION NOW</div>
+            <div class="pb-mock-sb">BNY is in the most aggressive phase of its AI transformation — 35% employee adoption of Eliza with board-level commitment to 80%+ by Q4. The bottleneck is data quality, not model capability.</div>
+          </div>
+          <div class="pb-mock-section">
+            <div class="pb-mock-sh" style="color:#3fb950">🎯 WIN THEME</div>
+            <div class="pb-mock-sb" style="color:var(--green);font-weight:600">"You've built the AI. We make the data ready for it."</div>
+          </div>
+          <div class="pb-mock-section">
+            <div class="pb-mock-sh" style="color:#58a6ff">📞 HOW TO REACH HER</div>
+            <div class="pb-step-mock"><div class="pb-step-n">📋</div><div><strong>Channel:</strong> Email first, LinkedIn same day. Do NOT cold call at CIO level.</div></div>
+            <div class="pb-step-mock"><div class="pb-step-n">🔗</div><div><strong>Reference:</strong> Her March 2025 CDO Magazine interview on AI-readiness at scale.</div></div>
+          </div>
+          <div class="pb-mock-section">
+            <div class="pb-mock-sh" style="color:#a78bfa">📅 ACTION SEQUENCE</div>
+            <div class="pb-step-mock"><div class="pb-step-n" style="color:var(--purple)">Day 1</div><div>Send personalised email referencing Eliza's 80% target and the data governance gap</div></div>
+            <div class="pb-step-mock"><div class="pb-step-n" style="color:var(--purple)">Day 3</div><div>LinkedIn connection with a one-line note about the CDO Magazine piece</div></div>
+            <div class="pb-step-mock"><div class="pb-step-n" style="color:var(--purple)">Day 7</div><div>Follow-up with a relevant data governance case study from a comparable institution</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <h3 style="font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:20px">Built for every experience level</h3>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px">
+            <div style="font-size:12px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Junior SDR</div>
+            <div style="font-size:14px;color:var(--text2);line-height:1.65">Step-by-step call scripts, exact email wording, objection handling with suggested responses. Every detail spelled out.</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--blue);border-radius:var(--radius);padding:20px 24px">
+            <div style="font-size:12px;font-weight:700;color:var(--blue3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Senior AE</div>
+            <div style="font-size:14px;color:var(--text2);line-height:1.65">Strategic context, specific reference points, conversation starters, and a sequenced action plan. Concise and actionable.</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px">
+            <div style="font-size:12px;font-weight:700;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Sales Leader</div>
+            <div style="font-size:14px;color:var(--text2);line-height:1.65">Executive summary, deal risk flags, and talking points for peer-to-peer conversations at C-suite level.</div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--text3);margin-top:20px;line-height:1.65">Playbooks transfer automatically to Salesforce — no copy-paste, no manual entry. Open any Lead record and the full playbook is waiting in the Description field.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="section section-alt">
+  <div class="section-inner">
+    <span class="eyebrow reveal">How it works</span>
+    <h2 class="section-title reveal">From config to pipeline<br/>in under 60 seconds.</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:48px">
+      <div class="steps reveal">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div>
+            <div class="step-title">Configure your ICP</div>
+            <div class="step-body">Set your target industry, company size, geography, titles, and keywords. Toggle the buying intent signals that matter for your product — AI Initiative, M&A Activity, Cloud Migration, and more.</div>
+            <div class="step-tags"><span class="step-tag">Industry</span><span class="step-tag">Seniority</span><span class="step-tag">Geography</span><span class="step-tag">Fortune 500</span></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div>
+            <div class="step-title">Add your company profile</div>
+            <div class="step-body">Paste your website URL and KRYSTL scans your offerings. Every profile generated will tie the prospect's specific pain directly to your solution — the AI Challenge and Buying Trigger become personalised to what you sell.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div>
+            <div class="step-title">Launch the intelligence agent</div>
+            <div class="step-body">KRYSTL searches across news, job postings, public filings, social signals, industry publications, podcasts, and more — synthesising everything into 6 complete prospect briefs in under 60 seconds. Need more? Generate 6 more with one click.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div>
+            <div class="step-title">Act — email, playbook, CRM</div>
+            <div class="step-body">Compose a personalised email, open the full sales playbook, or push every prospect directly to Salesforce as a Lead — complete with the intelligence brief and playbook in the record. All without leaving the app.</div>
+            <div class="step-tags"><span class="step-tag" style="color:var(--green);border-color:rgba(63,185,80,.3)">Salesforce</span><span class="step-tag" style="color:var(--blue3);border-color:rgba(88,166,255,.3)">Email</span><span class="step-tag" style="color:var(--purple);border-color:rgba(167,139,250,.3)">Playbook</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal" style="display:flex;flex-direction:column;gap:12px">
+        <!-- Buying signals showcase -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px">Buying Intent Signals</div>
+          <div class="signals-grid" style="margin-bottom:0">
+            <div class="signal-chip"><span class="signal-dot" style="background:var(--blue3)"></span>AI Initiative</div>
+            <div class="signal-chip"><span class="signal-dot" style="background:var(--green)"></span>M&A Activity</div>
+            <div class="signal-chip"><span class="signal-dot" style="background:var(--amber)"></span>Cloud Migration</div>
+            <div class="signal-chip"><span class="signal-dot" style="background:var(--purple)"></span>Data Migration</div>
+            <div class="signal-chip"><span class="signal-dot" style="background:var(--blue3)"></span>Data Lake</div>
+            <div class="signal-chip"><span class="signal-dot" style="background:var(--green)"></span>RFP / RFI</div>
+            <div class="signal-chip"><span class="signal-dot" style="background:var(--amber)"></span>HQ Relocation</div>
+            <div class="signal-chip"><span class="signal-dot" style="background:var(--purple)"></span>DC Relocation</div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)">+ Custom signals generated from your company website scan</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px">Intelligence Sources</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;color:var(--text2)">📰 &nbsp;News articles, press releases, earnings calls</div>
+            <div style="font-size:13px;color:var(--text2)">💼 &nbsp;Job postings reveal strategic priorities</div>
+            <div style="font-size:13px;color:var(--text2)">📋 &nbsp;SEC filings detect M&A and HQ changes</div>
+            <div style="font-size:13px;color:var(--text2)">🎙️ &nbsp;Podcasts, YouTube interviews, conference talks</div>
+            <div style="font-size:13px;color:var(--text2)">📚 &nbsp;Industry journals and analyst coverage</div>
+            <div style="font-size:13px;color:var(--text2)">💬 &nbsp;Forums, Reddit, professional communities</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Integrations -->
+<section class="section" id="integrations">
+  <div class="section-inner">
+    <span class="eyebrow reveal">Integrations</span>
+    <h2 class="section-title reveal">Works where your<br/>team already works.</h2>
+    <p class="section-sub reveal">Push intelligence directly to your CRM. No copy-paste, no manual entry. Every field mapped, every playbook included.</p>
+    <div class="integrations-grid reveal">
+      <div class="integration-card featured">
+        <div class="int-logo">☁️</div>
+        <div class="int-name">Salesforce</div>
+        <div class="int-desc">Full OAuth 2.0 integration. Prospects push as Leads with intent scoring, intelligence brief, and complete sales playbook in the Description field. Duplicate detection included.</div>
+        <div class="int-status live"><span class="int-dot"></span>Live</div>
+      </div>
+      <div class="integration-card">
+        <div class="int-logo">🟠</div>
+        <div class="int-name">HubSpot</div>
+        <div class="int-desc">Push enriched contacts directly to your HubSpot CRM with intent score, AI challenge, and buying trigger mapped to native and custom fields.</div>
+        <div class="int-status coming"><span class="int-dot"></span>Coming soon</div>
+      </div>
+      <div class="integration-card">
+        <div class="int-logo">📧</div>
+        <div class="int-name">Outreach / Salesloft</div>
+        <div class="int-desc">Send KRYSTL-generated prospects directly into sequences with pre-built personalisation from the intelligence brief.</div>
+        <div class="int-status coming"><span class="int-dot"></span>Coming soon</div>
+      </div>
+      <div class="integration-card">
+        <div class="int-logo">⚡</div>
+        <div class="int-name">Zapier</div>
+        <div class="int-desc">Connect KRYSTL to any workflow — Slack alerts, Notion databases, Google Sheets, or any tool in your stack.</div>
+        <div class="int-status coming"><span class="int-dot"></span>Coming soon</div>
+      </div>
+      <div class="integration-card">
+        <div class="int-logo">📊</div>
+        <div class="int-name">Pipedrive</div>
+        <div class="int-desc">Create deals and contacts automatically from KRYSTL output, with intent score mapped to deal probability.</div>
+        <div class="int-status coming"><span class="int-dot"></span>Coming soon</div>
+      </div>
+      <div class="integration-card">
+        <div class="int-logo">🔌</div>
+        <div class="int-name">API Access</div>
+        <div class="int-desc">Build KRYSTL intelligence into your own tools. RESTful API with webhook support for signal monitoring and prospect generation.</div>
+        <div class="int-status coming"><span class="int-dot"></span>Roadmap</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Who it's for -->
+<section class="section section-alt" id="for-who">
+  <div class="section-inner">
+    <span class="eyebrow reveal">Who it's for</span>
+    <h2 class="section-title reveal">Built for every<br/>revenue role.</h2>
+    <p class="section-sub reveal">From first-year SDRs to VP Sales — KRYSTL adapts to how you sell.</p>
+    <div class="personas-grid reveal">
+      <div class="persona-card">
+        <div class="persona-icon">🎯</div>
+        <div class="persona-title">Sales Development Reps</div>
+        <div class="persona-role">SDR / BDR</div>
+        <div class="persona-body">Stop spending 40+ minutes researching each account before you pick up the phone. KRYSTL gives you everything — the AI challenge, the buying trigger, the personalised email — in 60 seconds.</div>
+        <div class="persona-wins">
+          <div class="persona-win">10× more outreach per day</div>
+          <div class="persona-win">Step-by-step playbook for every call</div>
+          <div class="persona-win">Personalised emails in one click</div>
+        </div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-icon">🏆</div>
+        <div class="persona-title">Account Executives</div>
+        <div class="persona-role">AE / Senior AE</div>
+        <div class="persona-body">Walk into every conversation knowing the prospect's specific pain, their strategic priorities, and exactly what your product solves for them. Close with intelligence, not instinct.</div>
+        <div class="persona-wins">
+          <div class="persona-win">Real buying triggers, not guesswork</div>
+          <div class="persona-win">Strategic pitch angle per account</div>
+          <div class="persona-win">Direct CRM integration, zero admin</div>
+        </div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-icon">📈</div>
+        <div class="persona-title">Sales Leaders</div>
+        <div class="persona-role">VP Sales / CRO / RevOps</div>
+        <div class="persona-body">Give your team an unfair advantage. KRYSTL scales your best rep's research capability across the entire team — Fortune 500 ICP targeting, intent-scored pipeline, and CRM-ready intelligence.</div>
+        <div class="persona-wins">
+          <div class="persona-win">Fortune 500 targeting out of the box</div>
+          <div class="persona-win">Team-wide intelligence consistency</div>
+          <div class="persona-win">Full Salesforce integration on day one</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quote -->
+<section class="section quote-section">
+  <div class="section-inner">
+    <div class="quote-mark reveal">"</div>
+    <div class="quote-text reveal">If KRYSTL helps your team close <span class="hl">one additional deal per year,</span> the ROI is measured in thousands — not percentages.</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="cta-title">Ready to find the <span style="color:var(--blue3)">right buyers first?</span></div>
+  <p class="cta-sub">Request access to KRYSTL and start generating intelligence-grade prospect briefs in minutes.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a href="APEX-Sales-Intelligence-v2.html"><button class="btn-lg btn-lg-primary">Launch KRYSTL →</button></a>
+    <a href="mailto:mcavers@signalarity.ai"><button class="btn-lg btn-lg-ghost">Contact Signalarity</button></a>
+  </div>
+  <p class="cta-note">Private preview · Enterprise demos available · Salesforce integration ready</p>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-brand">
+    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+      <polygon points="50,4 72,28 50,48 28,28" fill="#1d4ed8"/>
+      <polygon points="50,4 28,28 22,52 50,48" fill="#3b82f6"/>
+      <polygon points="50,4 72,28 78,52 50,48" fill="#1e40af"/>
+      <polygon points="28,28 22,52 50,48" fill="#60a5fa"/>
+      <polygon points="22,52 50,96 50,48" fill="#2563eb"/>
+      <polygon points="78,52 50,48 50,96" fill="#1e40af"/>
+      <polygon points="44,48 56,48 50,58" fill="#93c5fd"/>
+    </svg>
+    <div>
+      <div class="footer-wordmark">signal<span>arity</span></div>
+      <div style="font-size:10px;color:var(--text3);margin-top:1px">KRYSTL AI Sales Intelligence</div>
+    </div>
+  </div>
+  <div class="footer-copy">© 2026 Signalarity LLC · All rights reserved</div>
+  <div class="footer-links">
+    <a href="mailto:mcavers@signalarity.ai">Contact</a>
+    <a href="APEX-Sales-Intelligence-v2.html">Launch App</a>
+  </div>
+</footer>
+
+</div><!-- /app -->
+
+<script>
+// ── GATE ─────────────────────────────────────────────────────────────────
+const PASSCODE = 'krystl2026';
+const GATE_KEY = 'sig_auth';
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('code') && sessionStorage.getItem('sf_client_id')) {
+    sessionStorage.setItem(GATE_KEY,'1');
+  }
+  if (sessionStorage.getItem(GATE_KEY) === '1') {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initReveal();
+  }
+  document.getElementById('gate-input').focus();
+})();
+
+function checkGate() {
+  const val = document.getElementById('gate-input').value;
+  if (val === PASSCODE) {
+    sessionStorage.setItem(GATE_KEY,'1');
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initReveal();
+  } else {
+    document.getElementById('gate-err').style.display = 'block';
+    document.getElementById('gate-input').value = '';
+    document.getElementById('gate-input').focus();
+  }
+}
+
+// ── SCROLL REVEAL ────────────────────────────────────────────────────────
+function initReveal() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+}
+</script>
+</body>
+</html>
